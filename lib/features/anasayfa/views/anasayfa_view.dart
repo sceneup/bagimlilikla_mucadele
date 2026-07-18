@@ -1,3 +1,4 @@
+import 'package:bagimlilik/core/widgets/BottomBar/custom_bottom_bar.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HaftalikKart/haftalik_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HedefKart/hedef_kart.dart';
@@ -13,7 +14,7 @@ class AnasayfaView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       backgroundColor: Color(0xFFEBEDE3),
       appBar: CustomAppBar(
         title: 'Merhaba İrem',
@@ -40,7 +41,6 @@ class AnasayfaView extends StatelessWidget {
               const SizedBox(height: 16,),
               HaftalikKart(),
               const SizedBox(height: 16,),
-
             ],
           ),
         ),
