@@ -1,9 +1,10 @@
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/HedefKart/hedef_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/alisveris_durtu_kontrol.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/appbar_actions.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/bekleme_list_baslik.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/bekleme_list_kart.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/gunluk_durum_kart.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/BeklemeKart/bekleme_list_baslik.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/BeklemeKart/bekleme_list_kart.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/GunlukDurumKart/gunluk_durum_kart.dart';
 import 'package:flutter/material.dart';
 
 class AnasayfaView extends StatelessWidget {
@@ -33,6 +34,9 @@ class AnasayfaView extends StatelessWidget {
               BeklemeListBaslik(),
               const SizedBox(height: 16,),
               BeklemeListKart(),
+              const SizedBox(height: 16,),
+              HedefKart(),
+              const SizedBox(height: 16,),
             ],
           ),
         ),

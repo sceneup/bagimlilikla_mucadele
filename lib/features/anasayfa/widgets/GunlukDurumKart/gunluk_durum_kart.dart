@@ -1,5 +1,5 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/gunluk_progress_indicator.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/GunlukDurumKart/gunluk_progress_indicator.dart';
 import 'package:flutter/material.dart';
 
 class GunlukDurumKart extends StatelessWidget {
