@@ -14,6 +14,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        fontFamily: 'Inter',
+      ),
       home: const AnasayfaView(),
     );
   }

@@ -35,6 +35,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -51,11 +52,15 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+
+        - asset: assets/fonts/Inter-Italict.ttf
+          style: italic
 
   # To add assets to your application, add an assets section, like this:
   # assets:

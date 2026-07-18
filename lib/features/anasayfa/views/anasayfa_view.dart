@@ -7,7 +7,25 @@ class AnasayfaView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      appBar: CustomAppBar(title: 'MENTİS'),
+      appBar: CustomAppBar(
+        title: 'Merhaba İrem',
+        centerTitle: false,
+        actions: [
+          Padding(
+            padding: EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              radius: 20,
+              child: Text('İ'),
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+          ],
+        ),
+      ),
     );
   }
 }
