@@ -16,7 +16,7 @@ class HedefSonuc extends StatelessWidget {
         children: [
           const Icon(Icons.call_made_sharp,color: AppColors.accent,),
           const SizedBox(width: 5,),
-          Text("Bu hafta ₺540 korudun",style: TextStyle(fontSize: 18),)
+          Expanded(child: Text("Bu hafta ₺540 korudun",style: TextStyle(fontSize: 18),))
         ],
       ),
     );

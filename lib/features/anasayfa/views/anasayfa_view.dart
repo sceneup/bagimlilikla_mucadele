@@ -1,4 +1,5 @@
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/HaftalikKart/haftalik_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HedefKart/hedef_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/alisveris_durtu_kontrol.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/appbar_actions.dart';
@@ -37,6 +38,9 @@ class AnasayfaView extends StatelessWidget {
               const SizedBox(height: 16,),
               HedefKart(),
               const SizedBox(height: 16,),
+              HaftalikKart(),
+              const SizedBox(height: 16,),
+
             ],
           ),
         ),
