@@ -27,6 +27,7 @@ class CustomAppBar extends StatelessWidget
       centerTitle: centerTitle,
       leading: leading,
       actions: actions,
+      backgroundColor: AppColors.secondaryContainer2,
     );
   }
 

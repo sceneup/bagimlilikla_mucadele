@@ -10,6 +10,8 @@ abstract final class AppColors {
   /// Hafif vurgu / Bilgilendirme kutuları
   static const secondaryContainer = Color(0xFFE6EEC9);
 
+  static const secondaryContainer2 = Color(0xFFEBEDE3);
+
   /// Vurgu rengi (Grafikler, AI kartları, özel butonlar)
   static const accent = Color(0xFF35858E);
 

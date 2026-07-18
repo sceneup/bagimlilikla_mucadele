@@ -1,4 +1,5 @@
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/alisveris_durtu_kontrol.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/appbar_actions.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/gunluk_durum_kart.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,8 @@ class AnasayfaView extends StatelessWidget {
             children: [
               SizedBox(height: 16,),
               DailyStatusCard(),
-              SizedBox(height: 8,),
+              SizedBox(height: 16,),
+              KontrolKart(),
             ],
           ),
         ),
