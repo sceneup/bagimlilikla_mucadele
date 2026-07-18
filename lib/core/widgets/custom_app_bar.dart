@@ -23,7 +23,6 @@ class CustomAppBar extends StatelessWidget
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(title,style: TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold),),
-      elevation: 0.5,
       centerTitle: centerTitle,
       leading: leading,
       actions: actions,

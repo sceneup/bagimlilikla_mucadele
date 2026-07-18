@@ -2,8 +2,8 @@ import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/gunluk_progress_indicator.dart';
 import 'package:flutter/material.dart';
 
-class DailyStatusCard extends StatelessWidget {
-  const DailyStatusCard({super.key});
+class GunlukDurumKart extends StatelessWidget {
+  const GunlukDurumKart({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class DailyStatusCard extends StatelessWidget {
                 ],
               ),
           ),
-          DailyProgressIndicator(value: 0.75,),
+          GunlukProgressIndicator(value: 0.75,),
         ],
       ),
     );

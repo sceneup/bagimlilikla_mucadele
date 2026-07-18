@@ -1,9 +1,9 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:flutter/material.dart';
 
-class DailyProgressIndicator extends StatelessWidget {
+class GunlukProgressIndicator extends StatelessWidget {
   final double value;
-  const DailyProgressIndicator({super.key,required this.value});
+  const GunlukProgressIndicator({super.key,required this.value});
 
   @override
   Widget build(BuildContext context) {
