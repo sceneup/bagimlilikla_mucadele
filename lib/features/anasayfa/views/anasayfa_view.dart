@@ -21,6 +21,7 @@ class AnasayfaView extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Column(
             children: [
+              SizedBox(height: 16,),
               DailyStatusCard(),
               SizedBox(height: 8,),
             ],
