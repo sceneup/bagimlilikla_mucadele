@@ -13,7 +13,7 @@ class BilgiView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFEBEDE3),
-      appBar: CustomAppBar(title:'Bilgi Kutularım'),
+      appBar: CustomAppBar(title:'Bilgi Kutularım',centerTitle: false,),
       body: SingleChildScrollView(
         child:Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),

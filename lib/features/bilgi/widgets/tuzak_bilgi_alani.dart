@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bagimlilik/core/colors/app_colors.dart';
 class TuzakBilgiAlani extends StatelessWidget {
   const TuzakBilgiAlani({super.key});
 
