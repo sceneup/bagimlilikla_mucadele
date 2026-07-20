@@ -1,7 +1,9 @@
+import 'package:bagimlilik/features/bilgi/widgets/SimuleReklam/hemen_al_button.dart';
 import 'package:bagimlilik/features/bilgi/widgets/SimuleReklam/indirim_kart.dart';
 import 'package:bagimlilik/features/bilgi/widgets/SimuleReklam/kampanya_rozet.dart';
 import 'package:bagimlilik/features/bilgi/widgets/SimuleReklam/simule_urun_gorsel.dart';
 import 'package:bagimlilik/features/bilgi/widgets/SimuleReklam/urun_bilgi_alani.dart';
+import 'package:bagimlilik/features/bilgi/widgets/SimuleReklam/zaman_kart_alani.dart';
 import 'package:flutter/material.dart';
 
 class SimuleKart extends StatelessWidget {
@@ -38,7 +40,11 @@ class SimuleKart extends StatelessWidget {
                 child: IndirimKart(),
               ),
             ],
-          )
+          ),
+          const SizedBox(height: 16,),
+          ZamanKartAlani(),
+          const SizedBox(height: 10,),
+          HemenAlButton(),
 
         ],
       ),
