@@ -33,7 +33,7 @@ class AnketBaslikAlani extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
-                      color: Colors.black.withOpacity(0.10),
+                      color: Colors.black.withValues(alpha: 0.10),
                     ),
                   ),
                 ),
@@ -60,7 +60,7 @@ class AnketBaslikAlani extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6,),
-            const Text("bu test 3 dakika sürer ve deneyiminizi kişiselleştirmemize yardımcı olur",style: const TextStyle(fontSize: 16),textAlign: TextAlign.justify,)
+            const Text("bu test 3 dakika sürer ve deneyiminizi kişiselleştirmemize yardımcı olur",style: TextStyle(fontSize: 16),textAlign: TextAlign.justify,)
           ],
     );
   }

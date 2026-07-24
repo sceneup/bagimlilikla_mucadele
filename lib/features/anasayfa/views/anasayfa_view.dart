@@ -1,5 +1,4 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
-import 'package:bagimlilik/core/widgets/BottomBar/custom_bottom_bar.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HaftalikKart/haftalik_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HedefKart/hedef_kart.dart';
