@@ -1,3 +1,4 @@
+import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/BottomBar/custom_bottom_bar.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HaftalikKart/haftalik_kart.dart';
@@ -15,7 +16,7 @@ class AnasayfaView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFEBEDE3),
+      backgroundColor: AppColors.secondaryContainer2,
       appBar: CustomAppBar(
         title: 'Merhaba İrem',
         centerTitle: false,
