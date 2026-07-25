@@ -17,5 +17,7 @@ abstract final class AppColors {
 
   static const Color blue = Color(0xFF99C2FF);
 
+  static const Color purple2 = Color(0xFFC47BE4);
+
 
 }

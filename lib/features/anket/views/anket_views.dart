@@ -36,7 +36,7 @@ class AnketViews extends StatelessWidget {
                         onPressed: (){},
                         child: const Text("Devam Et",style:  const TextStyle(fontSize: 30),),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.accent,
+                          backgroundColor: AppColors.purple2,
                           foregroundColor: Colors.white
                         ),
                     ),

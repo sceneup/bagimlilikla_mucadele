@@ -41,7 +41,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/analiz',
               builder: (context, state) {
-                return const AnketViews();
+                return const AnalizView();
               },
             ),
           ],
