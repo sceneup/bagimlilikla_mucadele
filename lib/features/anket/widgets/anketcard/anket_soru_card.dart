@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 class AnketSoruCard extends StatelessWidget {
   final int soruNo;
   final String soruMetni;
+  final int? seciliDeger;
+  final ValueChanged<int?> onChanged;
 
   const AnketSoruCard({
     required this.soruNo,
     required this.soruMetni,
+    required this.seciliDeger,
+    required this.onChanged,
     super.key,
   });
 
@@ -30,10 +34,9 @@ class AnketSoruCard extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),),
              AnketCevaplar(
-               seciliDeger: 1,
-               onChanged: (value) {
-               debugPrint(value.toString());
-             },),
+               seciliDeger: seciliDeger,
+               onChanged: onChanged,
+             ),
         ],
       ),
     );

@@ -1,5 +1,4 @@
 import 'package:bagimlilik/core/routers/main_shell.dart';
-import 'package:bagimlilik/features/analiz/views/analiz_view.dart';
 import 'package:bagimlilik/features/anasayfa/views/anasayfa_view.dart';
 import 'package:bagimlilik/features/anket/views/anket_views.dart';
 import 'package:bagimlilik/features/bilgi/views/bilgi_view.dart';
@@ -41,7 +40,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/analiz',
               builder: (context, state) {
-                return const AnalizView();
+                return const AnketViews();
               },
             ),
           ],
