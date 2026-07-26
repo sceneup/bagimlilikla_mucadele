@@ -1,0 +1,126 @@
+{
+  "bolumler": [
+    {
+      "bolumNo": 1,
+      "kod": "A",
+      "baslik": "Satın Alma ile Zihinsel Meşguliyet",
+      "sorular": [
+        {
+          "id": 1,
+          "metin": "Gün içinde satın almayı düşündüğüm zamanlar olur."
+        },
+        {
+          "id": 2,
+          "metin": "Boş vakitlerimde sık sık ürün inceleyerek zaman geçiririm."
+        },
+        {
+          "id": 3,
+          "metin": "Alışveriş yapma fikri aklıma beklediğimden daha sık gelir."
+        }
+      ]
+    },
+    {
+      "bolumNo": 2,
+      "kod": "B",
+      "baslik": "Dürtü Kontrolü",
+      "sorular": [
+        {
+          "id": 4,
+          "metin": "Satın alma isteği oluştuğunda bunu ertelemekte zorlanırım."
+        },
+        {
+          "id": 5,
+          "metin": "Planlamadığım hâlde alışveriş yaptığım olur."
+        },
+        {
+          "id": 6,
+          "metin": "Alışveriş yapmamaya karar versem bile bazen kendimi durduramam."
+        }
+      ]
+    },
+    {
+      "bolumNo": 3,
+      "kod": "C",
+      "baslik": "Duygusal Düzenleme",
+      "sorular": [
+        {
+          "id": 7,
+          "metin": "Kendimi üzgün hissettiğimde alışveriş yapma isteğim artar."
+        },
+        {
+          "id": 8,
+          "metin": "Stresli olduğum zamanlarda alışveriş bana iyi gelecekmiş gibi hissederim."
+        },
+        {
+          "id": 9,
+          "metin": "Alışveriş yaptıktan sonra kısa süreli de olsa rahatladığımı hissederim."
+        },
+        {
+          "id": 10,
+          "metin": "Moralimi düzeltmek için bazen bir şeyler satın alırım."
+        }
+      ]
+    },
+    {
+      "bolumNo": 4,
+      "kod": "D",
+      "baslik": "Kontrol Kaybı",
+      "sorular": [
+        {
+          "id": 11,
+          "metin": "Alışveriş sırasında başlangıçta düşündüğümden daha fazla harcama yaptığım olur."
+        },
+        {
+          "id": 12,
+          "metin": "İhtiyacım olmayan ürünleri satın aldığım zamanlar olur."
+        },
+        {
+          "id": 13,
+          "metin": "Alışveriş sonrasında \"Keşke almasaydım.\" dediğim olur."
+        }
+      ]
+    },
+    {
+      "bolumNo": 5,
+      "kod": "E",
+      "baslik": "Günlük Yaşama Etkisi",
+      "sorular": [
+        {
+          "id": 14,
+          "metin": "Harcamalarım zaman zaman bütçemi zorlar."
+        },
+        {
+          "id": 15,
+          "metin": "Alışveriş davranışım nedeniyle kendimi suçlu hissettiğim olur."
+        },
+        {
+          "id": 16,
+          "metin": "Alışveriş alışkanlıklarım günlük yaşamımı olumsuz etkileyebilir."
+        },
+        {
+          "id": 17,
+          "metin": "Harcamalarımı kontrol etmek istediğim hâlde zorlandığım dönemler olur."
+        }
+      ]
+    },
+    {
+      "bolumNo": 6,
+      "kod": "F",
+      "baslik": "Farkındalık ve Değişime Hazırlık",
+      "sorular": [
+        {
+          "id": 18,
+          "metin": "Alışveriş alışkanlıklarımı gözden geçirmek isterim."
+        },
+        {
+          "id": 19,
+          "metin": "Daha planlı alışveriş yapmayı hedefliyorum."
+        },
+        {
+          "id": 20,
+          "metin": "Harcama davranışlarımı daha bilinçli yönetmek benim için önemlidir."
+        }
+      ]
+    }
+  ]
+}
