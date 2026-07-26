@@ -1,10 +1,29 @@
 import 'package:bagimlilik/core/routers/app_router.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+void configLoading() {
+  EasyLoading.instance
+    ..displayDuration = const Duration(seconds: 2)
+    ..indicatorType = EasyLoadingIndicatorType.fadingCircle
+    ..loadingStyle = EasyLoadingStyle.custom
+    ..backgroundColor = Colors.white
+    ..indicatorColor = Colors.red
+    ..textColor = Colors.black87
+    ..maskColor = Colors.black45
+    ..maskType = EasyLoadingMaskType.black
+    ..radius = 14
+    ..fontSize = 16
+    ..userInteractions = false
+    ..dismissOnTap = true;
+}
+
 void main() {
+  configLoading();
   runApp(
-      const ProviderScope( child: MyApp()));
+      const ProviderScope( child: MyApp())
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -20,6 +39,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Inter',
       ),
       routerConfig: appRouter,
+      builder: EasyLoading.init(),
     );
   }
 }

@@ -5,6 +5,7 @@ import 'package:bagimlilik/features/anket/widgets/anket_baslik_alani.dart';
 import 'package:bagimlilik/features/anket/widgets/anket_gizlilik.dart';
 import 'package:bagimlilik/features/anket/widgets/anketcard/anket_soru_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AnketViews extends ConsumerWidget {
@@ -118,12 +119,8 @@ class AnketViews extends ConsumerWidget {
                           viewModel.aktifBolumTamamlandiMi();
 
                           if (!tamamlandiMi) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "Devam etmeden önce tüm soruları cevaplayınız.",
-                                ),
-                              ),
+                            EasyLoading.showError(
+                              "Lütfen tüm soruları cevaplayınız.",
                             );
 
                             return;
