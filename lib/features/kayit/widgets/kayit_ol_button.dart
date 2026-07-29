@@ -4,7 +4,7 @@ import 'package:bagimlilik/features/kayit/viewmodels/kayit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 class KayitOlButton extends ConsumerWidget {
   const KayitOlButton({super.key});
 
@@ -32,7 +32,7 @@ class KayitOlButton extends ConsumerWidget {
             }
         ),
         TextButton(onPressed: (){
-          Navigator.pop(context);
+          context.go("/register");
         },
             child: Text("Geri",style: const TextStyle(color: AppColors.accent,fontSize: 20),))
       ],

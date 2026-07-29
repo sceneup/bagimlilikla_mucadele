@@ -4,6 +4,7 @@ import 'package:bagimlilik/features/kayit/widgets/kayit_baslik.dart';
 import 'package:bagimlilik/features/kayit/widgets/kayit_detay_form.dart';
 import 'package:bagimlilik/features/kayit/widgets/kayit_ol_button.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class KayitDetayViews extends StatelessWidget {
   const KayitDetayViews({super.key});
@@ -15,6 +16,11 @@ class KayitDetayViews extends StatelessWidget {
       appBar: CustomAppBar(
         title: "Sirius",
         centerTitle: false,
+        leading: IconButton(
+            onPressed: (){
+              context.go("/register");
+            },
+            icon: Icon(Icons.arrow_back,color: Colors.black,)),
       ),
       body:  SafeArea(
         child: SingleChildScrollView(
