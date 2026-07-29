@@ -21,6 +21,7 @@ class KayitViewModel extends Notifier<KayitState> {
   String? selectedIncomeLevel;
   String? selectedPhoneUsage;
 
+
   void setBirthDate(DateTime date) {
     state = state.copyWith(
       birthDate: date,
@@ -60,6 +61,11 @@ class KayitViewModel extends Notifier<KayitState> {
   void setDailyPhoneUsage(String? usage) {
     state = state.copyWith(
       selectedDailyPhoneUsage: usage,
+    );
+  }
+  void setAvatar(String avatarPath) {
+    state = state.copyWith(
+      selectedAvatar: avatarPath,
     );
   }
 

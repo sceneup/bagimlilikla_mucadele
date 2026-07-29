@@ -9,6 +9,7 @@ class KayitState {
   final String? selectedEmploymentStatus;
   final String? selectedIncomeLevel;
   final String? selectedDailyPhoneUsage;
+  final String selectedAvatar;
 
   const KayitState({
     this.isLoading = false,
@@ -20,6 +21,7 @@ class KayitState {
     this.selectedEmploymentStatus,
     this.selectedIncomeLevel,
     this.selectedDailyPhoneUsage,
+    this.selectedAvatar = "assets/images/avatars/varsayilan.JPG",
   });
 
   KayitState copyWith({
@@ -32,6 +34,7 @@ class KayitState {
     String? selectedEmploymentStatus,
     String? selectedIncomeLevel,
     String? selectedDailyPhoneUsage,
+    String? selectedAvatar,
   }) {
     return KayitState(
       isLoading: isLoading ?? this.isLoading,
@@ -48,6 +51,7 @@ class KayitState {
       selectedIncomeLevel ?? this.selectedIncomeLevel,
       selectedDailyPhoneUsage:
       selectedDailyPhoneUsage ?? this.selectedDailyPhoneUsage,
+      selectedAvatar: selectedAvatar ?? this.selectedAvatar,
     );
   }
 }

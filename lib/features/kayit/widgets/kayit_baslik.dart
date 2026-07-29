@@ -20,7 +20,7 @@ class KayitBaslik extends StatelessWidget {
   Widget build(BuildContext context) {
     double widths = MediaQuery.sizeOf(context).width;
     return Column(
-      spacing: 16,
+      spacing: 5,
       children: [
         Text("ADIM $adim",style: const TextStyle(color: AppColors.primary,fontSize: 18,fontWeight: FontWeight.w800),),
         SizedBox(

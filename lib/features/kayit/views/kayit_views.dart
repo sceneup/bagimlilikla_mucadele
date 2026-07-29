@@ -1,6 +1,7 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
 import 'package:bagimlilik/features/kayit/widgets/devam_button.dart';
+import 'package:bagimlilik/features/kayit/widgets/kayit_avatar_secim.dart';
 import 'package:bagimlilik/features/kayit/widgets/kayit_baslik.dart';
 import 'package:bagimlilik/features/kayit/widgets/kayit_form.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,7 @@ class KayitViews extends StatelessWidget {
                       spacing: 16,
                       children: [
                         KayitBaslik(adim: "1", value: 0.5, title: "Hesap Oluştur", description: "Sirius'a katılın ve kişisel gelişim yolculuğunuza başlayın."),
+                        KayitAvatarSecim(),
                         KayitForm(),
                         DevamButton()
                       ],
