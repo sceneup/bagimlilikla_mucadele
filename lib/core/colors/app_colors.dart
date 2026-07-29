@@ -19,5 +19,17 @@ abstract final class AppColors {
 
   static const Color purple2 = Color(0xFFC47BE4);
 
+  static const textPrimary = Color(0xFF1F2937);
+  static const textSecondary = Color(0xFF6B7280);
+
+  // Form Elemanları
+  static const border = Color(0xFFD1D5DB);
+  static const hint = Color(0xFF9CA3AF);
+
+  // Durum Renkleri
+  static const success = Color(0xFF22C55E);
+  static const warning = Color(0xFFF59E0B);
+  static const error = Color(0xFFEF4444);
+
 
 }

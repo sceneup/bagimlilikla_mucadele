@@ -2,12 +2,29 @@ import 'package:bagimlilik/core/routers/main_shell.dart';
 import 'package:bagimlilik/features/anasayfa/views/anasayfa_view.dart';
 import 'package:bagimlilik/features/anket/views/anket_views.dart';
 import 'package:bagimlilik/features/bilgi/views/bilgi_view.dart';
+import 'package:bagimlilik/features/giris/views/giris_views.dart';
+import 'package:bagimlilik/features/kayit/views/kayit_detay_views.dart';
+import 'package:bagimlilik/features/kayit/views/kayit_views.dart';
 import 'package:bagimlilik/features/profil/views/profil_view.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/anasayfa',
+  initialLocation: "/login",
   routes: [
+    // Login
+    GoRoute(
+      path: "/login",
+      builder: (context, state) => const GirisViews(),
+    ),
+    // Register
+    GoRoute(
+      path: "/register",
+      builder: (context, state) => const KayitViews(),
+    ),
+    GoRoute(
+      path: "/detailregister",
+      builder: (context, state) => const KayitDetayViews(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainShell(
