@@ -1,7 +1,6 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_buttons.dart';
 import 'package:bagimlilik/features/giris/viewmodels/giris_provider.dart';
-import 'package:bagimlilik/features/kayit/viewmodels/kayit_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
