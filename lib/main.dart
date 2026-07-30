@@ -1,4 +1,5 @@
 import 'package:bagimlilik/core/routers/app_router.dart';
+import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,8 +20,10 @@ void configLoading() {
     ..dismissOnTap = true;
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   configLoading();
+  await BildirimService().baslat();
   runApp(
       const ProviderScope( child: MyApp())
   );

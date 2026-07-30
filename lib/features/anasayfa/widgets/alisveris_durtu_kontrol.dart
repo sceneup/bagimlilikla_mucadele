@@ -1,5 +1,6 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class KontrolKart extends StatelessWidget {
   const KontrolKart({super.key});
@@ -46,7 +47,7 @@ class KontrolKart extends StatelessWidget {
             width: double.infinity,
             height: 50,
             child: ElevatedButton(
-                onPressed: (){},
+                onPressed: () => context.push('/odak-kontrolu'),
                 child: const Text("Odak Kontrolünü Başlat",style: TextStyle(fontSize: 20),),
               style:ElevatedButton.styleFrom(
                 backgroundColor: AppColors.accent,

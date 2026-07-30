@@ -22,7 +22,7 @@ class MainShell extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => context.push('/odak-kontrolu'),
         backgroundColor: AppColors.accent,
         foregroundColor: Colors.white,
         child: const Icon(Icons.add),
