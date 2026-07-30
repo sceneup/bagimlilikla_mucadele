@@ -21,7 +21,7 @@ class DevamButton extends ConsumerWidget {
             height: 50,
             onPressed: () {
               if (vm.formKey.currentState!.validate()) {
-                context.go("/detailregister");
+                context.go("/register-detay");
               }
               else{
                 EasyLoading.showInfo(
@@ -37,7 +37,7 @@ class DevamButton extends ConsumerWidget {
               style:TextStyle(color: AppColors.textSecondary,fontSize: 16) ,),
             TextButton(
               onPressed: (){
-                context.go("/login");
+                context.go("/giris");
               },
               child: const Text("Giriş Yap",
                 style:TextStyle(color: AppColors.accent,fontSize: 18,fontWeight: FontWeight.bold)),

@@ -21,9 +21,11 @@ class KayitOlButton extends ConsumerWidget {
             height: 50,
             onPressed: (){
                if(vm.detailFormKey.currentState!.validate()){
-
-               }
-               else{
+                 EasyLoading.showSuccess("Kayıt başarılı");
+                 Future.delayed(const Duration(seconds: 2), () {
+                   context.go("/anasayfa");
+                 });
+               } else{
                  EasyLoading.showInfo(
                    "Lütfen hatalı alanları kontrol ediniz.",
                  );
