@@ -1,5 +1,6 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
+import 'package:bagimlilik/core/widgets/custom_buttons.dart';
 import 'package:bagimlilik/features/anket/viewmodels/anket_view_models.dart';
 import 'package:bagimlilik/features/anket/widgets/anket_baslik_alani.dart';
 import 'package:bagimlilik/features/anket/widgets/anket_gizlilik.dart';
@@ -106,11 +107,15 @@ class AnketViews extends ConsumerWidget {
                     const AnketGizlilik(),
 
                     const SizedBox(height: 16),
-
                     SizedBox(
                       width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
+                      child: CustomButton(
+                        backgroundColor: AppColors.purple2,
+                        fontSize: 26,
+                        text: anketState.aktifBolumIndex ==
+                            anketState.bolumler.length - 1
+                            ? "Tamamla"
+                            : "Devam Et",
                         onPressed: () {
                           final viewModel =
                           ref.read(anketViewModelProvider.notifier);
@@ -122,28 +127,13 @@ class AnketViews extends ConsumerWidget {
                             EasyLoading.showError(
                               "Lütfen tüm soruları cevaplayınız.",
                             );
-
                             return;
                           }
 
                           viewModel.sonrakiBolumeGec();
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.purple2,
-                          foregroundColor: Colors.white,
-                        ),
-                        child: Text(
-                          anketState.aktifBolumIndex ==
-                              anketState.bolumler.length - 1
-                              ? "Tamamla"
-                              : "Devam Et",
-                          style: const TextStyle(
-                            fontSize: 30,
-                          ),
-                        ),
                       ),
                     ),
-
                     const SizedBox(height: 16),
                   ],
                 ),
