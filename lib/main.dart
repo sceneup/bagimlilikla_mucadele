@@ -1,9 +1,10 @@
 import 'package:bagimlilik/core/routers/app_router.dart';
-import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:bagimlilik/core/config/supabase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 void configLoading() {
   EasyLoading.instance
@@ -21,12 +22,20 @@ void configLoading() {
     ..dismissOnTap = true;
 }
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    publishableKey: SupabaseConfig.supabaseAnonKey,
+  );
+
   configLoading();
-  await BildirimService().baslat();
+
   runApp(
-      const ProviderScope( child: MyApp())
+    const ProviderScope(
+      child: MyApp(),
+    ),
   );
 }
 

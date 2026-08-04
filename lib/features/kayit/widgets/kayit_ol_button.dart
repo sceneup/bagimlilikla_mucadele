@@ -19,18 +19,24 @@ class KayitOlButton extends ConsumerWidget {
             backgroundColor: AppColors.accent,
             fontSize: 20,
             height: 50,
-            onPressed: (){
-               if(vm.detailFormKey.currentState!.validate()){
-                 EasyLoading.showSuccess("Kayıt başarılı");
-                 Future.delayed(const Duration(seconds: 2), () {
-                   context.go("/anasayfa");
-                 });
-               } else{
-                 EasyLoading.showInfo(
-                   "Lütfen hatalı alanları kontrol ediniz.",
-                 );
-                 return;
-               }
+            onPressed: ()async{
+              if (!vm.detailFormKey.currentState!.validate()) {
+                EasyLoading.showInfo(
+                  "Lütfen hatalı alanları kontrol ediniz.",
+                );
+                return;
+              }
+
+              final success = await vm.register();
+              if (success) {
+                EasyLoading.showSuccess("Kayıt başarılı");
+
+                await Future.delayed(const Duration(seconds: 2));
+
+                if (context.mounted) {
+                  context.go("/giris");
+                }
+              }
             }
         ),
         TextButton(onPressed: (){

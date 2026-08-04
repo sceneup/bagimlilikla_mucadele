@@ -43,6 +43,9 @@ dependencies:
   intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
+  supabase_flutter: ^2.16.0
+  notification_listener_service: ^1.0.0
+
 
 
 dev_dependencies:

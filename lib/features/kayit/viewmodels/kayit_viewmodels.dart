@@ -1,8 +1,13 @@
+import 'package:bagimlilik/features/auth/providers/auth_provider.dart';
+import 'package:bagimlilik/features/auth/services/auth_service.dart';
 import 'package:bagimlilik/features/kayit/models/kayit_models.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class KayitViewModel extends Notifier<KayitState> {
+  late final AuthService _authService;
 
   final formKey = GlobalKey<FormState>();
   final detailFormKey = GlobalKey<FormState>();
@@ -68,9 +73,37 @@ class KayitViewModel extends Notifier<KayitState> {
       selectedAvatar: avatarPath,
     );
   }
+  String get email => emailController.text.trim();
+  String get password => sifreController.text;
+  Future<bool> register() async {
+    EasyLoading.show(
+      status: "Kayıt oluşturuluyor...",
+    );
+
+    try {
+      await _authService.signUp(
+        email: email,
+        password: password,
+      );
+
+      EasyLoading.dismiss();
+
+      return true;
+    } on AuthException catch (e) {
+      EasyLoading.showError(e.message);
+      return false;
+    } catch (e) {
+      EasyLoading.showError(
+        "Beklenmeyen bir hata oluştu.",
+      );
+      return false;
+    }
+  }
 
   @override
   KayitState build() {
+
+    _authService = ref.read(authServiceProvider);
 
     ref.onDispose(() {
       adsoyadController.dispose();
