@@ -1,4 +1,5 @@
 class NotificationState {
+
   final bool hasPermission;
 
   const NotificationState({

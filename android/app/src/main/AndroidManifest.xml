@@ -47,7 +47,7 @@
             android:exported="true">
 
             <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
+                <action android:name="android.service.notification.NotificationListenerService"/>
             </intent-filter>
 
         </service>

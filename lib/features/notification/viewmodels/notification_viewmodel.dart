@@ -11,25 +11,31 @@ class NotificationViewModel extends Notifier<NotificationState> {
 
   }
 
-  Future<void> initialize() async {
+  Future<void> enableNotifications() async {
 
-    final service = ref.read(notificationServiceProvider);
+    final service =
+    ref.read(notificationServiceProvider);
 
-    final granted = await service.requestPermission();
+    final granted =
+    await service.requestPermission();
 
     state = state.copyWith(
       hasPermission: granted,
     );
 
     if (granted) {
+
       service.startListening();
+
     }
 
   }
 
   void stopListening() {
 
-    ref.read(notificationServiceProvider).stopListening();
+    ref
+        .read(notificationServiceProvider)
+        .stopListening();
 
   }
 
