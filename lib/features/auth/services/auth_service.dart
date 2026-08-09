@@ -13,6 +13,15 @@ class AuthService {
     );
   }
 
+  Future<AuthResponse> signIn({
+    required String email,
+    required String password,
+  }) async {
+    return await _supabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+  }
 
 
 }

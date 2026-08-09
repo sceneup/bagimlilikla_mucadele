@@ -2,7 +2,6 @@ import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_buttons.dart';
 import 'package:bagimlilik/features/giris/viewmodels/giris_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,19 +19,17 @@ class GirisButton extends ConsumerWidget {
             backgroundColor: AppColors.accent,
             fontSize: 20,
             height: 50,
-            onPressed: (){
-              if(vm.formKey.currentState!.validate()){
-                EasyLoading.showSuccess("Giriş başarılı");
-
-                Future.delayed(const Duration(seconds: 2), () {
-                  context.go("/anasayfa");
-                });
-              }
-              else{
-                EasyLoading.showInfo(
-                  "Lütfen hatalı alanları kontrol ediniz.",
-                );
+            onPressed: () async{
+              if (!vm.formKey.currentState!.validate()) {
                 return;
+              }
+
+              final success = await ref
+                  .read(girisViewModelProvider.notifier)
+                  .login();
+
+              if (success && context.mounted) {
+                context.go("/anasayfa");
               }
             }
         ),

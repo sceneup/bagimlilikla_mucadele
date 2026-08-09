@@ -69,6 +69,25 @@ class KayitDetayForm extends ConsumerWidget {
               )
           ),
           GirdiField(
+              label: "Kiminle Yaşıyorsunuz?",
+              child: CustomDropdown(
+                hintText: "Kiminle yaşıyorsunuz seçiniz",
+                items: KayitDropdownItems.livingStatus
+                    .map(
+                      (living) => DropdownMenuItem(
+                    value:living,
+                    child: Text(living),
+                  ),
+                ).toList(),
+                onChanged: vm.setLivingStatus,
+                validator: (value) =>
+                    AppValidators.required(
+                      value,
+                      fieldName: "Kiminle Yaşıyorsunuz?",
+                    ),
+              )
+          ),
+          GirdiField(
               label: "Eğitim Durumu",
               child: CustomDropdown(
                 hintText: "Eğitim durumunuzu seçiniz",
@@ -103,44 +122,6 @@ class KayitDetayForm extends ConsumerWidget {
                     AppValidators.required(
                       value,
                       fieldName: "Meslek Durumu",
-                    ),
-              )
-          ),
-          GirdiField(
-              label: "Gelir Durumu",
-              child: CustomDropdown(
-                hintText: "Gelir durumunuzu seçiniz",
-                items: KayitDropdownItems.incomeLevels
-                    .map(
-                      (income) => DropdownMenuItem(
-                    value:income,
-                    child: Text(income),
-                  ),
-                ).toList(),
-                onChanged: vm.setIncomeLevel,
-                validator: (value) =>
-                    AppValidators.required(
-                      value,
-                      fieldName: "Gelir Durumu",
-                    ),
-              )
-          ),
-          GirdiField(
-              label: "Telefon Süreniz",
-              child: CustomDropdown(
-                hintText: "Günlük telefon sürenizi seçiniz",
-                items: KayitDropdownItems.phoneUsage
-                    .map(
-                      (phone) => DropdownMenuItem(
-                    value:phone,
-                    child: Text(phone),
-                  ),
-                ).toList(),
-                onChanged: vm.setDailyPhoneUsage,
-                validator: (value) =>
-                    AppValidators.required(
-                      value,
-                      fieldName: "Telefon Süreniz",
                     ),
               )
           ),

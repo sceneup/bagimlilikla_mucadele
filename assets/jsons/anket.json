@@ -102,25 +102,7 @@
           "metin": "Harcamalarımı kontrol etmek istediğim hâlde zorlandığım dönemler olur."
         }
       ]
-    },
-    {
-      "bolumNo": 6,
-      "kod": "F",
-      "baslik": "Farkındalık ve Değişime Hazırlık",
-      "sorular": [
-        {
-          "id": 18,
-          "metin": "Alışveriş alışkanlıklarımı gözden geçirmek isterim."
-        },
-        {
-          "id": 19,
-          "metin": "Daha planlı alışveriş yapmayı hedefliyorum."
-        },
-        {
-          "id": 20,
-          "metin": "Harcama davranışlarımı daha bilinçli yönetmek benim için önemlidir."
-        }
-      ]
     }
+
   ]
 }

@@ -24,26 +24,18 @@ class KayitDropdownItems {
 
   static const employmentStatus = [
     "Öğrenci",
-    "Ev Hanımı"
+    "Ev Hanımı",
     "Tam Zamanlı Çalışıyor",
     "Yarı Zamanlı Çalışıyor",
     "Çalışmıyor",
     "Emekli",
     "Serbest Meslek",
   ];
-
-  static const incomeLevels = [
-    "0 - 20.000 TL",
-    "20.001 - 40.000 TL",
-    "40.001 - 60.000 TL",
-    "60.001 TL ve üzeri",
-  ];
-
-  static const phoneUsage = [
-    "1 saatten az",
-    "1 - 3 saat",
-    "3 - 5 saat",
-    "5 - 7 saat",
-    "7 saatten fazla",
+  static const livingStatus = [
+    "Yalnız yaşıyorum",
+    "Ailemle yaşıyorum",
+    "Eşim/partnerimle yaşıyorum",
+    "Arkadaşlarımla/ev arkadaşlarımla yaşıyorum",
+    "Diğer",
   ];
 }

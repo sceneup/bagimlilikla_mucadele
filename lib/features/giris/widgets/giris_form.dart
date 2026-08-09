@@ -26,7 +26,7 @@ class GirisForm extends ConsumerWidget {
             GirdiField(
               label: "Kullanıcı Adı",
               child: CustomTextField(
-                controller: vm.adController,
+                controller: vm.usernameController,
                 hintText: "Kullanıcı adınızı girin",
                 prefixIcon: Icons.alternate_email,
                 validator: (value) =>

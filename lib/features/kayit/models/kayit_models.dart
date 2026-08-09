@@ -7,8 +7,7 @@ class KayitState {
   final String? selectedMaritalStatus;
   final String? selectedEducation;
   final String? selectedEmploymentStatus;
-  final String? selectedIncomeLevel;
-  final String? selectedDailyPhoneUsage;
+  final String? selectedLivingStatus;
   final String selectedAvatar;
 
   const KayitState({
@@ -19,8 +18,7 @@ class KayitState {
     this.selectedMaritalStatus,
     this.selectedEducation,
     this.selectedEmploymentStatus,
-    this.selectedIncomeLevel,
-    this.selectedDailyPhoneUsage,
+    this.selectedLivingStatus,
     this.selectedAvatar = "assets/images/avatars/varsayilan.JPG",
   });
 
@@ -32,8 +30,7 @@ class KayitState {
     String? selectedMaritalStatus,
     String? selectedEducation,
     String? selectedEmploymentStatus,
-    String? selectedIncomeLevel,
-    String? selectedDailyPhoneUsage,
+    String? selectedLivingStatus,
     String? selectedAvatar,
   }) {
     return KayitState(
@@ -47,10 +44,8 @@ class KayitState {
       selectedEducation ?? this.selectedEducation,
       selectedEmploymentStatus:
       selectedEmploymentStatus ?? this.selectedEmploymentStatus,
-      selectedIncomeLevel:
-      selectedIncomeLevel ?? this.selectedIncomeLevel,
-      selectedDailyPhoneUsage:
-      selectedDailyPhoneUsage ?? this.selectedDailyPhoneUsage,
+      selectedLivingStatus:
+      selectedLivingStatus ?? this.selectedLivingStatus,
       selectedAvatar: selectedAvatar ?? this.selectedAvatar,
     );
   }
