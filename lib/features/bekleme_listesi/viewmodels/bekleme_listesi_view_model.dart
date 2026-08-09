@@ -23,14 +23,11 @@ class BeklemeListesiViewModel extends AsyncNotifier<List<BeklemeOgesi>> {
     for (final oge in liste) {
       if (oge.suresiDoldu) {
         await _rozetService.rozetEkle('rozet_${oge.id}', oge.kategoriId);
+        await _service.ogeSil(oge.id);
         rozetKazanildi = true;
       } else {
         aktifler.add(oge);
       }
-    }
-
-    if (aktifler.length != liste.length) {
-      await _service.listeyiKaydet(aktifler);
     }
 
     if (rozetKazanildi) {
@@ -42,15 +39,17 @@ class BeklemeListesiViewModel extends AsyncNotifier<List<BeklemeOgesi>> {
 
   Future<void> ekle(String kategoriId) async {
     final mevcut = await future;
+    final userId = _service.currentUserId;
     final yeniOge = BeklemeOgesi(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
+      userId: userId,
       kategoriId: kategoriId,
       eklenmeTarihi: DateTime.now(),
     );
     final guncelListe = [...mevcut, yeniOge];
 
     state = AsyncData(guncelListe);
-    await _service.listeyiKaydet(guncelListe);
+    await _service.ogeEkle(yeniOge);
 
     final kategori = _kategoriService
         .kategorileriGetir()
@@ -70,7 +69,7 @@ class BeklemeListesiViewModel extends AsyncNotifier<List<BeklemeOgesi>> {
     final guncelListe = mevcut.where((oge) => oge.id != id).toList();
 
     state = AsyncData(guncelListe);
-    await _service.listeyiKaydet(guncelListe);
+    await _service.ogeSil(id);
     await _bildirimService.hatirlaticiIptalEt(_bildirimIdUret(id));
   }
 }
@@ -79,3 +78,4 @@ final beklemeListesiViewModelProvider =
     AsyncNotifierProvider<BeklemeListesiViewModel, List<BeklemeOgesi>>(
       BeklemeListesiViewModel.new,
     );
+

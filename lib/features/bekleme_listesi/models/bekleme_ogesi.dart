@@ -2,11 +2,13 @@ class BeklemeOgesi {
   static const int bekleSuresiSaat = 24;
 
   final String id;
+  final String? userId;
   final String kategoriId;
   final DateTime eklenmeTarihi;
 
   const BeklemeOgesi({
     required this.id,
+    this.userId,
     required this.kategoriId,
     required this.eklenmeTarihi,
   });
@@ -29,15 +31,33 @@ class BeklemeOgesi {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    if (userId != null) 'user_id': userId,
+    'category_id': kategoriId,
+    'created_at': eklenmeTarihi.toIso8601String(),
     'kategoriId': kategoriId,
     'eklenmeTarihi': eklenmeTarihi.toIso8601String(),
   };
 
+  Map<String, dynamic> toSupabaseMap() {
+    final map = <String, dynamic>{
+      'id': id,
+      'category_id': kategoriId,
+      'created_at': eklenmeTarihi.toIso8601String(),
+    };
+    if (userId != null) {
+      map['user_id'] = userId;
+    }
+    return map;
+  }
+
   factory BeklemeOgesi.fromJson(Map<String, dynamic> json) {
     return BeklemeOgesi(
-      id: json['id'] as String,
-      kategoriId: json['kategoriId'] as String,
-      eklenmeTarihi: DateTime.parse(json['eklenmeTarihi'] as String),
+      id: json['id'].toString(),
+      userId: (json['user_id'] ?? json['userId'])?.toString(),
+      kategoriId: (json['category_id'] ?? json['kategoriId']) as String,
+      eklenmeTarihi: DateTime.parse(
+        (json['created_at'] ?? json['eklenmeTarihi']) as String,
+      ),
     );
   }
 }

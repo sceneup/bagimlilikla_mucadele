@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:bagimlilik/core/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bagimlilik/features/notification/services/notification_service.dart';
+import 'package:flutter/foundation.dart';
 
 void configLoading() {
   EasyLoading.instance
@@ -35,7 +36,9 @@ Future<void> main() async {
 
   await notificationService.initialize();
 
-  notificationService.startListening();
+  if (!kIsWeb) {
+    notificationService.startListening();
+  }
 
   configLoading();
 
@@ -49,7 +52,6 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
@@ -77,4 +79,3 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
