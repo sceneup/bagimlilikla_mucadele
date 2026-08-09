@@ -37,14 +37,15 @@ class GirisViewModel extends Notifier<GirisState> {
       final username = usernameController.text.trim();
       final password = passwordController.text;
 
-      // 1. Kullanıcı adına göre profili bul
-      final profile = await Supabase.instance.client
-          .from('profiles')
-          .select('email')
-          .eq('username', username)
-          .maybeSingle();
+      // Kullanıcı adından email'i bul
+      final email = await Supabase.instance.client.rpc(
+        'get_email_by_username',
+        params: {
+          'input_username': username,
+        },
+      );
 
-      if (profile == null) {
+      if (email == null) {
         EasyLoading.showError(
           "Kullanıcı adı veya şifre hatalı.",
         );
@@ -52,9 +53,7 @@ class GirisViewModel extends Notifier<GirisState> {
         return false;
       }
 
-      final email = profile['email'] as String;
-
-      // 2. Supabase Auth ile giriş yap
+      // Email + şifre ile Supabase Auth
       final response = await _authService.signIn(
         email: email,
         password: password,
@@ -71,18 +70,25 @@ class GirisViewModel extends Notifier<GirisState> {
       EasyLoading.dismiss();
 
       return true;
-    } on AuthException {
+
+    } on AuthException catch (e) {
+      debugPrint("AUTH ERROR: ${e.message}");
+
       EasyLoading.showError(
         "Kullanıcı adı veya şifre hatalı.",
       );
 
       return false;
+
     } catch (e) {
+      debugPrint("LOGIN ERROR: $e");
+
       EasyLoading.showError(
         "Giriş yapılırken bir hata oluştu.",
       );
 
       return false;
+
     } finally {
       setLoading(false);
     }

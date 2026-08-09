@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:bagimlilik/core/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bagimlilik/features/notification/services/notification_service.dart';
 
 void configLoading() {
   EasyLoading.instance
@@ -29,6 +30,12 @@ Future<void> main() async {
     url: SupabaseConfig.supabaseUrl,
     publishableKey: SupabaseConfig.supabaseAnonKey,
   );
+
+  final notificationService = NotificationService();
+
+  await notificationService.initialize();
+
+  notificationService.startListening();
 
   configLoading();
 

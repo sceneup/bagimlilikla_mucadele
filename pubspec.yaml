@@ -38,13 +38,13 @@ dependencies:
   flutter_riverpod: ^3.3.2
   flutter_easyloading: ^3.0.5
   shared_preferences: ^2.3.3
-  flutter_local_notifications: ^18.0.1
   timezone: ^0.9.4
   intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
   supabase_flutter: ^2.16.0
   notification_listener_service: ^1.0.0
+  flutter_local_notifications: ^18.0.1
 
 
 
