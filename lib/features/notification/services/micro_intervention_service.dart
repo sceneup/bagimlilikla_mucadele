@@ -74,14 +74,6 @@ class MicroInterventionService {
         );
         break;
 
-      case DarkPatternType.hiddenCost:
-        await _notificationService.showMicroIntervention(
-          title: "Ek maliyetleri kontrol et 💰",
-          body:
-          "Satın alma sürecinde ek bir ücret bulunuyor olabilir. "
-              "Ödemeden önce toplam tutarı kontrol etmek ister misin?",
-        );
-        break;
 
       case DarkPatternType.confirmShaming:
         await _notificationService.showMicroIntervention(
@@ -92,14 +84,6 @@ class MicroInterventionService {
         );
         break;
 
-      case DarkPatternType.forcedAction:
-        await _notificationService.showMicroIntervention(
-          title: "Seçeneklerini kontrol et 🔎",
-          body:
-          "Bu bildirim belirli bir eylemi gerçekleştirmeye "
-              "yönlendiriyor olabilir. Alternatiflerini değerlendirebilirsin.",
-        );
-        break;
 
       case DarkPatternType.none:
         break;

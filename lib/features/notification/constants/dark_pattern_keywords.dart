@@ -68,18 +68,6 @@ class DarkPatternKeywords {
     "hala düşünüyor musun",
   ];
 
-  // Gizli / sonradan ortaya çıkan maliyet
-  static const hiddenCost = [
-    "hizmet bedeli",
-    "işlem bedeli",
-    "ek ücret",
-    "ek maliyet",
-    "sonradan eklendi",
-    "sepete eklenen ücret",
-    "sipariş ücretine eklendi",
-    "ek ödeme",
-  ];
-
   // Confirm shaming
   static const confirmShaming = [
     "fırsatı kaçırmayı tercih ediyorum",
@@ -88,16 +76,5 @@ class DarkPatternKeywords {
     "fırsatı kaçır",
     "hayır, istemiyorum",
     "hayır, devam etmek istemiyorum",
-  ];
-
-  // Forced action
-  static const forcedAction = [
-    "devam etmek için",
-    "devam etmek zorundasınız",
-    "devam etmek için kabul edin",
-    "kabul etmeden devam edemezsiniz",
-    "zorunlu",
-    "etkinleştirmek için",
-    "yararlanmak için kabul edin",
   ];
 }

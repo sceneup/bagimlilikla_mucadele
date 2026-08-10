@@ -3,8 +3,6 @@ enum DarkPatternType {
   urgency,
   socialProof,
   retargeting,
-  hiddenCost,
   confirmShaming,
-  forcedAction,
   none,
 }

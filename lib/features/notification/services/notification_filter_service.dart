@@ -176,19 +176,6 @@ class NotificationFilterService {
     }
 
     // ------------------------------------------------------------
-    // HIDDEN COST
-    // ------------------------------------------------------------
-
-    if (_containsAny(
-      text,
-      DarkPatternKeywords.hiddenCost,
-    ) ||
-        DarkPatternRegex.additionalFee.hasMatch(text) ||
-        DarkPatternRegex.extraPrice.hasMatch(text)) {
-      patterns.add(DarkPatternType.hiddenCost);
-    }
-
-    // ------------------------------------------------------------
     // CONFIRM SHAMING
     // ------------------------------------------------------------
 
@@ -197,17 +184,6 @@ class NotificationFilterService {
       DarkPatternKeywords.confirmShaming,
     )) {
       patterns.add(DarkPatternType.confirmShaming);
-    }
-
-    // ------------------------------------------------------------
-    // FORCED ACTION
-    // ------------------------------------------------------------
-
-    if (_containsAny(
-      text,
-      DarkPatternKeywords.forcedAction,
-    )) {
-      patterns.add(DarkPatternType.forcedAction);
     }
 
     // ============================================================

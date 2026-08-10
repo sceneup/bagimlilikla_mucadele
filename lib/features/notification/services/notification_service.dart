@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:notification_listener_service/notification_listener_service.dart';
 
 import 'local_notification_service.dart';
@@ -10,39 +11,25 @@ import 'verification_intervention_service.dart';
 class NotificationService {
   StreamSubscription? _subscription;
 
-  final LocalNotificationService _localNotificationService =
-  LocalNotificationService();
+  final LocalNotificationService _localNotificationService = LocalNotificationService();
 
   late final MicroInterventionService _microInterventionService;
-
-  late final VerificationInterventionService
-  _verificationInterventionService;
+  late final VerificationInterventionService _verificationInterventionService;
 
   bool _isInitialized = false;
   bool _isListening = false;
 
-  // ============================================================
-  // DUPLICATE KONTROLÜ
-  // ============================================================
 
-  String? _lastNotificationKey;
-  DateTime? _lastNotificationTime;
+  static String? _lastNotificationKey;
+  static DateTime? _lastNotificationTime;
 
-  // Aynı notification birkaç saniye içerisinde
-  // tekrar gelirse ikinci kez işlemiyoruz.
-  static const Duration _duplicateWindow =
-  Duration(seconds: 5);
 
-  // ============================================================
-  // BAŞLAT
-  // ============================================================
+  static const Duration _duplicateWindow = Duration(seconds: 5);
+  static final Set<String> _processingShoppingKeys = {};
+  static final Map<String, DateTime> _recentShoppingKeys = {};
+  static const Duration _shoppingDuplicateWindow = Duration(seconds: 30);
 
   Future<void> initialize() async {
-    if (_isInitialized) {
-      print("🔁 NotificationService zaten initialize edildi.");
-      return;
-    }
-
     await _localNotificationService.initialize();
 
     _microInterventionService =
@@ -56,94 +43,112 @@ class NotificationService {
         );
 
     _isInitialized = true;
-
-    print("🟢 NotificationService initialize edildi.");
   }
 
-  // ============================================================
-  // İZİN
-  // ============================================================
-
   Future<bool> requestPermission() async {
-    return await NotificationListenerService.requestPermission();
+    return await NotificationListenerService
+        .requestPermission();
   }
 
   Future<bool> isPermissionGranted() async {
-    return await NotificationListenerService.isPermissionGranted();
+    return await NotificationListenerService
+        .isPermissionGranted();
   }
 
-  // ============================================================
-  // DİNLEMEYİ BAŞLAT
-  // ============================================================
-
   void startListening() {
-    // ------------------------------------------------------------
-    // INITIALIZE KONTROLÜ
-    // ------------------------------------------------------------
-
     if (!_isInitialized) {
-      print(
-        "❌ NotificationService henüz initialize edilmedi.",
-      );
       return;
     }
-
-    // ------------------------------------------------------------
-    // ZATEN DİNLİYORSA TEKRAR LISTENER OLUŞTURMA
-    // ------------------------------------------------------------
 
     if (_isListening) {
-      print(
-        "🔁 NotificationService zaten dinliyor. "
-            "Yeni listener oluşturulmadı.",
-      );
       return;
     }
-
     _isListening = true;
-
     final filter = NotificationFilterService();
-
-    print("🟢 NotificationService dinlemeye başladı.");
-
-    // ------------------------------------------------------------
-    // NOTIFICATION STREAM
-    // ------------------------------------------------------------
-
     _subscription =
-        NotificationListenerService.notificationsStream.listen(
+        NotificationListenerService.notificationsStream
+            .listen(
               (event) async {
             try {
-              // ======================================================
-              // ANALİZ
-              // ======================================================
-
               final analysis = filter.analyze(
                 packageName: event.packageName,
                 title: event.title,
                 content: event.content,
               );
 
-              // ======================================================
-              // İLGİLENMEDİĞİMİZ BİLDİRİM
-              // ======================================================
-
               if (analysis == null) {
                 return;
               }
 
-              // ======================================================
-              // DUPLICATE KONTROLÜ
-              // ======================================================
-              //
-              // ÇOK ÖNEMLİ:
-              //
-              // Bu kontrol LOCAL NOTIFICATION çağrısından ÖNCE
-              // yapılmalıdır.
-              //
-              // Böylece aynı notification 3-4 kere stream'e düşse
-              // sadece ilk event işlenir.
-              // ======================================================
+              if (analysis.isShoppingVerification) {
+                print(
+                  "Merchant: ${analysis.merchantName}",
+                );
+
+                print(
+                  "Amount: ${analysis.amount}",
+                );
+
+                final shoppingKey =
+                _createShoppingNotificationKey(
+                  analysis,
+                );
+
+                print(
+                  "Shopping Key: $shoppingKey",
+                );
+
+                if (_processingShoppingKeys
+                    .contains(shoppingKey)) {
+
+                  print(
+                    "   Key: $shoppingKey",
+                  );
+
+                  return;
+                }
+
+                final now = DateTime.now();
+
+                final lastShoppingTime =
+                _recentShoppingKeys[shoppingKey];
+
+                if (lastShoppingTime != null &&
+                    now
+                        .difference(lastShoppingTime)
+                        .compareTo(
+                      _shoppingDuplicateWindow,
+                    ) <
+                        0) {
+
+                  print(
+                    "   Key: $shoppingKey",
+                  );
+
+                  return;
+                }
+
+                _processingShoppingKeys.add(
+                  shoppingKey,
+                );
+
+                _recentShoppingKeys[shoppingKey] = now;
+
+                try {
+                  await _verificationInterventionService
+                      .sendShoppingVerificationNotification(
+                    merchantName:
+                    analysis.merchantName ??
+                        "Bilinmeyen mağaza",
+                    amount: analysis.amount,
+                  );
+                } finally {
+                  _processingShoppingKeys.remove(
+                    shoppingKey,
+                  );
+                }
+                return;
+              }
 
               final notificationKey =
                   "${analysis.packageName}|"
@@ -153,37 +158,26 @@ class NotificationService {
               final now = DateTime.now();
 
               final isDuplicate =
-                  _lastNotificationKey == notificationKey &&
+                  _lastNotificationKey ==
+                      notificationKey &&
                       _lastNotificationTime != null &&
-                      now.difference(_lastNotificationTime!) <
-                          _duplicateWindow;
+                      now
+                          .difference(
+                        _lastNotificationTime!,
+                      )
+                          .compareTo(
+                        _duplicateWindow,
+                      ) <
+                          0;
 
               if (isDuplicate) {
-                print(
-                  "🔁 Duplicate notification engellendi.",
-                );
-
-                print(
-                  "   Key: $notificationKey",
-                );
-
                 return;
               }
 
-              // ------------------------------------------------------
-              // BURASI ÇOK ÖNEMLİ
-              // ------------------------------------------------------
-              //
-              // await sendNotification() ÇAĞRISINDAN ÖNCE
-              // kaydediyoruz.
-              // ------------------------------------------------------
+              _lastNotificationKey =
+                  notificationKey;
 
-              _lastNotificationKey = notificationKey;
               _lastNotificationTime = now;
-
-              // ======================================================
-              // DEBUG
-              // ======================================================
 
               print(
                 "========== NOTIFICATION ==========",
@@ -224,122 +218,81 @@ class NotificationService {
               print(
                 "==================================",
               );
-
-              // ======================================================
-              // ALIŞVERİŞ DOĞRULAMASI
-              // ======================================================
-
-              print(
-                "SHOPPING VERIFICATION CHECK: "
-                    "${analysis.notificationType}",
-              );
-
-              if (analysis.isShoppingVerification) {
-                print(
-                  "🛒🛒🛒 SHOPPING VERIFICATION YAKALANDI!",
-                );
-
-                print(
-                  "Merchant: ${analysis.merchantName}",
-                );
-
-                print(
-                  "Amount: ${analysis.amount}",
-                );
-
-                // ----------------------------------------------------
-                // ARTIK SADECE İLK EVENT BURAYA GELEBİLİR
-                // ----------------------------------------------------
-
-                await _verificationInterventionService
-                    .sendShoppingVerificationNotification(
-                  merchantName:
-                  analysis.merchantName ??
-                      "Bilinmeyen mağaza",
-                  amount: analysis.amount,
-                );
-
-                return;
-              }
-
-              print(
-                "YAKALANMADI!",
-              );
-
-              // ======================================================
-              // DARK PATTERN YOK
-              // ======================================================
-
               if (!analysis.hasDarkPattern) {
                 return;
               }
-
-              // ======================================================
-              // DARK PATTERN VAR
-              // ======================================================
 
               await _microInterventionService
                   .sendIntervention(
                 analysis.detectedPatterns,
               );
             } catch (e, stackTrace) {
-              print(
+              debugPrint(
                 "❌ NotificationService hata: $e",
               );
 
-              print(stackTrace);
+              debugPrint(stackTrace.toString());
             }
           },
           onError: (error) {
-            print(
+            debugPrint(
               "❌ Notification stream hatası: $error",
             );
           },
         );
   }
 
-  // ============================================================
-  // DİNLEMEYİ DURDUR
-  // ============================================================
+  String _createShoppingNotificationKey(
+      dynamic analysis,
+      ) {
+    final packageName =
+    analysis.packageName
+        .toString()
+        .trim()
+        .toLowerCase();
+
+    final merchant =
+    (analysis.merchantName ?? "")
+        .toString()
+        .trim()
+        .toLowerCase();
+
+    final amount =
+    (analysis.amount ?? "")
+        .toString()
+        .trim()
+        .toLowerCase();
+
+    final verificationCode =
+    (analysis.verificationCode ?? "")
+        .toString()
+        .trim();
+
+    return "$packageName|"
+        "$merchant|"
+        "$amount|"
+        "$verificationCode";
+  }
 
   void stopListening() {
     _subscription?.cancel();
     _subscription = null;
-
     _isListening = false;
-
-    print(
-      "🔴 NotificationService dinleme durduruldu.",
-    );
   }
-
-  // ============================================================
-  // DUPLICATE CACHE TEMİZLE
-  // ============================================================
 
   void clearDuplicateCache() {
     _lastNotificationKey = null;
     _lastNotificationTime = null;
-
-    print(
-      "🧹 Notification duplicate cache temizlendi.",
-    );
+    _processingShoppingKeys.clear();
+    _recentShoppingKeys.clear();
   }
-
-  // ============================================================
-  // TEMİZLE
-  // ============================================================
 
   void dispose() {
     stopListening();
-
     _lastNotificationKey = null;
     _lastNotificationTime = null;
-
+    _processingShoppingKeys.clear();
+    _recentShoppingKeys.clear();
     _isInitialized = false;
-
-    print(
-      "🧹 NotificationService dispose edildi.",
-    );
   }
 }
