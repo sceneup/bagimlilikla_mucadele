@@ -37,7 +37,7 @@ class BeklemeListesiViewModel extends AsyncNotifier<List<BeklemeOgesi>> {
     return aktifler;
   }
 
-  Future<void> ekle(String kategoriId) async {
+  Future<void> ekle(String kategoriId, {double? fiyat}) async {
     final mevcut = await future;
     final userId = _service.currentUserId;
     final yeniOge = BeklemeOgesi(
@@ -45,6 +45,7 @@ class BeklemeListesiViewModel extends AsyncNotifier<List<BeklemeOgesi>> {
       userId: userId,
       kategoriId: kategoriId,
       eklenmeTarihi: DateTime.now(),
+      fiyat: fiyat,
     );
     final guncelListe = [...mevcut, yeniOge];
 

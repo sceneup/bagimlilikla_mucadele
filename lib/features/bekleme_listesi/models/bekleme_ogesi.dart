@@ -5,12 +5,14 @@ class BeklemeOgesi {
   final String? userId;
   final String kategoriId;
   final DateTime eklenmeTarihi;
+  final double? fiyat;
 
   const BeklemeOgesi({
     required this.id,
     this.userId,
     required this.kategoriId,
     required this.eklenmeTarihi,
+    this.fiyat,
   });
 
   Duration get kalanSure {
@@ -36,6 +38,8 @@ class BeklemeOgesi {
     'created_at': eklenmeTarihi.toIso8601String(),
     'kategoriId': kategoriId,
     'eklenmeTarihi': eklenmeTarihi.toIso8601String(),
+    'price': fiyat,
+    'fiyat': fiyat,
   };
 
   Map<String, dynamic> toSupabaseMap() {
@@ -43,6 +47,7 @@ class BeklemeOgesi {
       'id': id,
       'category_id': kategoriId,
       'created_at': eklenmeTarihi.toIso8601String(),
+      'price': fiyat,
     };
     if (userId != null) {
       map['user_id'] = userId;
@@ -51,6 +56,7 @@ class BeklemeOgesi {
   }
 
   factory BeklemeOgesi.fromJson(Map<String, dynamic> json) {
+    final rawPrice = json['price'] ?? json['fiyat'];
     return BeklemeOgesi(
       id: json['id'].toString(),
       userId: (json['user_id'] ?? json['userId'])?.toString(),
@@ -58,6 +64,7 @@ class BeklemeOgesi {
       eklenmeTarihi: DateTime.parse(
         (json['created_at'] ?? json['eklenmeTarihi']) as String,
       ),
+      fiyat: rawPrice != null ? (rawPrice as num).toDouble() : null,
     );
   }
 }

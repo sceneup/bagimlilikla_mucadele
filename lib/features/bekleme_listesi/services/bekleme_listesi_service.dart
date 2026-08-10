@@ -75,6 +75,7 @@ class BeklemeListesiService {
             userId: userId,
             kategoriId: oge.kategoriId,
             eklenmeTarihi: oge.eklenmeTarihi,
+            fiyat: oge.fiyat,
           )
         : oge;
 
