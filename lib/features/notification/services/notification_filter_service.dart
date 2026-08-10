@@ -1,147 +1,14 @@
 import 'package:bagimlilik/features/notification/constants/dark_pattern_keywords.dart';
 import 'package:bagimlilik/features/notification/constants/dark_pattern_regex.dart';
+import 'package:bagimlilik/features/notification/constants/notification_app_packages.dart';
 import 'package:bagimlilik/features/notification/constants/verification_code_regex.dart';
 import 'package:bagimlilik/features/notification/enums/dark_pattern_type.dart';
 import 'package:bagimlilik/features/notification/enums/notification_type.dart';
 import 'package:bagimlilik/features/notification/models/notification_analysis.dart';
 
 class NotificationFilterService {
-
   // ============================================================
-  // NORMAL BİLDİRİM SINIFLANDIRMASI
-  // ============================================================
-
-  NotificationType detect({
-    required String packageName,
-    required String title,
-    required String content,
-  }) {
-    final package = packageName.toLowerCase();
-    final text = "$title $content".toLowerCase();
-
-
-    const ignoredPackages = [
-      "com.android.systemui",
-      "com.android.settings",
-    ];
-
-    // Sistem bildirimlerini tamamen yok say
-    if (ignoredPackages.contains(package)) {
-      return NotificationType.unknown;
-    }
-
-    /// Bankalar
-    const bankKeywords = [
-      "ziraat",
-      "vakıf",
-      "vakif",
-      "garanti",
-      "akbank",
-      "iş bankası",
-      "is bankasi",
-      "şekerbank",
-      "sekerbank",
-      "qnb",
-      "enpara",
-      "denizbank",
-      "teb",
-      "yapı kredi",
-      "yapi kredi",
-      "halkbank",
-    ];
-
-    /// E-Ticaret
-    const shoppingKeywords = [
-      "trendyol",
-      "hepsiburada",
-      "amazon",
-      "n11",
-      "boyner",
-      "flo",
-      "lc waikiki",
-      "lcw",
-      "defacto",
-      "mavi",
-      "koton",
-      "pazarama",
-    ];
-
-    /// Kampanya
-    const campaignKeywords = [
-      "indirim",
-      "kampanya",
-      "kaçırma",
-      "son gün",
-      "stok",
-      "hemen al",
-      "fırsat",
-      "kupon",
-      "%",
-    ];
-
-    /// Kargo
-    const shippingKeywords = [
-      "kargoya verildi",
-      "teslim edildi",
-      "dağıtıma çıktı",
-      "siparişiniz",
-    ];
-
-    // ------------------------------------------------------------
-    // SMS KONTROLÜ
-    // ------------------------------------------------------------
-
-    if (package.contains("messaging")) {
-
-      // Alışveriş doğrulama SMS'i
-      if (bankKeywords.any((e) => text.contains(e)) &&
-          shoppingKeywords.any((e) => text.contains(e))) {
-        return NotificationType.shoppingVerification;
-      }
-
-      // Banka SMS'i
-      if (bankKeywords.any((e) => text.contains(e))) {
-        return NotificationType.bankSms;
-      }
-    }
-
-    // ------------------------------------------------------------
-    // KAMPANYA
-    // ------------------------------------------------------------
-
-    if (campaignKeywords.any((e) => text.contains(e))) {
-      return NotificationType.campaign;
-    }
-
-    // ------------------------------------------------------------
-    // KARGO
-    // ------------------------------------------------------------
-
-    if (shippingKeywords.any((e) => text.contains(e))) {
-      return NotificationType.shipping;
-    }
-
-    // ------------------------------------------------------------
-    // SOSYAL MEDYA
-    // ------------------------------------------------------------
-
-    if (package.contains("instagram") ||
-        package.contains("facebook") ||
-        package.contains("tiktok") ||
-        package.contains("youtube") ||
-        package.contains("whatsapp")) {
-      return NotificationType.socialMedia;
-    }
-
-    // ------------------------------------------------------------
-    // UNKNOWN
-    // ------------------------------------------------------------
-
-    return NotificationType.unknown;
-  }
-
-  // ============================================================
-  // DARK PATTERN + DOĞRULAMA KODU ANALİZİ
+  // BİLDİRİM ANALİZİ
   // ============================================================
 
   NotificationAnalysis? analyze({
@@ -150,6 +17,12 @@ class NotificationFilterService {
     required String content,
   }) {
     final package = packageName.toLowerCase();
+
+    final text = "$title $content".toLowerCase();
+
+    // ============================================================
+    // SIRIUS / SİSTEM BİLDİRİMLERİ
+    // ============================================================
 
     const ignoredPackages = [
       "com.android.systemui",
@@ -161,36 +34,100 @@ class NotificationFilterService {
       return null;
     }
 
-    // Önce text'i oluşturuyoruz.
-    final text = "$title $content".toLowerCase();
-
-    // ------------------------------------------------------------
+    // ============================================================
     // DOĞRULAMA KODU
-    // ------------------------------------------------------------
-
-    String? verificationCode;
+    // ============================================================
 
     final verificationMatch =
     VerificationCodeRegex.verificationCode.firstMatch(text);
 
-    if (verificationMatch != null) {
-      verificationCode = verificationMatch.group(2);
+    final hasVerificationCode =
+        verificationMatch != null;
+
+    final verificationCode =
+    verificationMatch?.group(1);
+    // ============================================================
+    // İŞLEM / ALIŞVERİŞ BAĞLAMI
+    // ============================================================
+
+    final hasTransactionContext =
+    VerificationCodeRegex.transactionContext.hasMatch(text);
+
+    // ============================================================
+    // TUTAR
+    // ============================================================
+
+    final amountMatch =
+    VerificationCodeRegex.amount.firstMatch(text);
+
+    final amount =
+    amountMatch?.group(1);
+
+    final hasAmount =
+        amountMatch != null;
+
+    // ============================================================
+    // MAĞAZA / İŞYERİ
+    // ============================================================
+
+    final merchantMatch =
+    VerificationCodeRegex.merchant.firstMatch(content);
+
+    String? merchantName =
+    merchantMatch?.group(1)?.trim();
+
+    if (merchantName != null &&
+        merchantName.isNotEmpty) {
+      merchantName = merchantName.toUpperCase();
     }
 
-    // ------------------------------------------------------------
-    // NORMAL BİLDİRİM TÜRÜNÜ BUL
-    // ------------------------------------------------------------
+    final hasMerchant =
+        merchantName != null &&
+            merchantName.isNotEmpty;
 
-    final notificationType = detect(
-      packageName: packageName,
-      title: title,
-      content: content,
+    // ============================================================
+    // DEBUG - SADECE ANALİZ İÇİN
+    // ============================================================
+
+    print("========== FILTER ANALYSIS ==========");
+    print("Package              : $package");
+    print("Has verificationCode : $hasVerificationCode");
+    print("Has transaction      : $hasTransactionContext");
+    print("Has amount           : $hasAmount");
+    print("Has merchant         : $hasMerchant");
+
+    // Kodun kendisini yazdırmıyoruz.
+    print("=====================================");
+
+    // ============================================================
+    // BİLDİRİM TÜRÜ
+    // ============================================================
+
+    final notificationType = _detectNotificationType(
+      package: package,
+      text: text,
+      hasVerificationCode: hasVerificationCode,
+      hasTransactionContext: hasTransactionContext,
+      hasAmount: hasAmount,
+      hasMerchant: hasMerchant,
     );
+
+    // ============================================================
+    // İLGİLENMEDİĞİMİZ BİLDİRİMLER
+    // ============================================================
+
+    if (notificationType == NotificationType.unknown) {
+      return null;
+    }
+
+    // ============================================================
+    // DARK PATTERNLER
+    // ============================================================
 
     final patterns = <DarkPatternType>{};
 
     // ------------------------------------------------------------
-    // SCARCITY - KıTLık
+    // SCARCITY
     // ------------------------------------------------------------
 
     if (_containsAny(
@@ -203,7 +140,7 @@ class NotificationFilterService {
     }
 
     // ------------------------------------------------------------
-    // URGENCY - ACİLİYET
+    // URGENCY
     // ------------------------------------------------------------
 
     if (_containsAny(
@@ -216,7 +153,7 @@ class NotificationFilterService {
     }
 
     // ------------------------------------------------------------
-    // SOCIAL PROOF - SOSYAL KANIT
+    // SOCIAL PROOF
     // ------------------------------------------------------------
 
     if (_containsAny(
@@ -228,7 +165,7 @@ class NotificationFilterService {
     }
 
     // ------------------------------------------------------------
-    // RETARGETING - YENİDEN HEDEFLEME
+    // RETARGETING
     // ------------------------------------------------------------
 
     if (_containsAny(
@@ -239,7 +176,7 @@ class NotificationFilterService {
     }
 
     // ------------------------------------------------------------
-    // HIDDEN COST - GİZLİ MALİYET
+    // HIDDEN COST
     // ------------------------------------------------------------
 
     if (_containsAny(
@@ -273,9 +210,9 @@ class NotificationFilterService {
       patterns.add(DarkPatternType.forcedAction);
     }
 
-    // ------------------------------------------------------------
-    // ANALİZ SONUCU
-    // ------------------------------------------------------------
+    // ============================================================
+    // SONUÇ
+    // ============================================================
 
     return NotificationAnalysis(
       notificationType: notificationType,
@@ -289,11 +226,103 @@ class NotificationFilterService {
       content: content,
 
       verificationCode: verificationCode,
+      merchantName: merchantName,
+      amount: amount,
     );
   }
 
   // ============================================================
-  // KEYWORD KONTROLÜ
+  // BİLDİRİM TÜRÜ
+  // ============================================================
+
+  NotificationType _detectNotificationType({
+    required String package,
+    required String text,
+    required bool hasVerificationCode,
+    required bool hasTransactionContext,
+    required bool hasAmount,
+    required bool hasMerchant,
+  }) {
+    // ============================================================
+    // ALIŞVERİŞ DOĞRULAMASI
+    // ============================================================
+
+    if (hasVerificationCode &&
+        hasTransactionContext &&
+        (hasAmount || hasMerchant)) {
+      return NotificationType.shoppingVerification;
+    }
+
+    // ============================================================
+    // WHATSAPP
+    // ============================================================
+
+    if (NotificationAppPackages.whatsapp.contains(package)) {
+      return NotificationType.whatsapp;
+    }
+
+    // ============================================================
+    // E-TİCARET
+    // ============================================================
+
+    if (NotificationAppPackages.eCommerce.contains(package)) {
+      return NotificationType.eCommerce;
+    }
+
+    // ============================================================
+    // SMS / BANKA
+    // ============================================================
+
+    if (NotificationAppPackages.messaging.contains(package)) {
+      if (_isBankSms(text)) {
+        return NotificationType.bankSms;
+      }
+
+      return NotificationType.unknown;
+    }
+
+    // ============================================================
+    // KENDİ UYGULAMAMIZ
+    // ============================================================
+
+    if (NotificationAppPackages.ownApp.contains(package)) {
+      return NotificationType.unknown;
+    }
+
+    return NotificationType.unknown;
+  }
+
+  // ============================================================
+  // BANKA SMS
+  // ============================================================
+
+  bool _isBankSms(String text) {
+    const bankKeywords = [
+      "ziraat",
+      "vakıf",
+      "vakif",
+      "garanti",
+      "akbank",
+      "iş bankası",
+      "is bankasi",
+      "şekerbank",
+      "sekerbank",
+      "qnb",
+      "enpara",
+      "denizbank",
+      "teb",
+      "yapı kredi",
+      "yapi kredi",
+      "halkbank",
+    ];
+
+    return bankKeywords.any(
+          (keyword) => text.contains(keyword),
+    );
+  }
+
+  // ============================================================
+  // KEYWORD
   // ============================================================
 
   bool _containsAny(
