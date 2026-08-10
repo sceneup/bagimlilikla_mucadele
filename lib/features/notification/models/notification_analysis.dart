@@ -13,6 +13,8 @@ class NotificationAnalysis {
   final String content;
 
   final String? verificationCode;
+  final String? merchantName;
+  final String? amount;
 
   const NotificationAnalysis({
     required this.notificationType,
@@ -21,6 +23,8 @@ class NotificationAnalysis {
     required this.title,
     required this.content,
     this.verificationCode,
+    this.merchantName,
+    this.amount,
   });
 
   bool get hasDarkPattern {

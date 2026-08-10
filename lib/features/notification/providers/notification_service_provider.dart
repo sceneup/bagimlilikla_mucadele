@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final notificationServiceProvider =
 Provider<NotificationService>((ref) {
+  final service = NotificationService();
 
-  return NotificationService();
+  ref.onDispose(() {
+    service.dispose();
+  });
 
+  return service;
 });

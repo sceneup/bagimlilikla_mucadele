@@ -1,9 +1,7 @@
 enum NotificationType {
   shoppingVerification,
-  campaign,
-  shipping,
-  orderCompleted,
+  eCommerce,
   bankSms,
-  socialMedia,
+  whatsapp,
   unknown,
 }

@@ -8,13 +8,20 @@ class VerificationInterventionService {
       );
 
   Future<void> sendShoppingVerificationNotification({
-    required String shoppingName,
+    required String merchantName,
+    String? amount,
   }) async {
+
+    final shoppingInfo = amount != null
+        ? "$merchantName üzerinden $amount TL"
+        : merchantName;
+
     await _notificationService.showMicroIntervention(
       title: "Alışveriş doğrulaması algılandı 🛒",
       body:
-      "$shoppingName alışverişine ait bir doğrulama kodu algılandı. "
+      "$shoppingInfo tutarında bir alışveriş için doğrulama kodu algılandı. "
           "Bu alışverişi bekleme listene eklemek ister misin?",
     );
+
   }
 }
