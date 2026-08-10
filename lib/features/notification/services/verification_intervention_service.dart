@@ -15,12 +15,15 @@ class VerificationInterventionService {
         ? "$merchantName üzerinden $amount TL"
         : merchantName;
 
-    await _notificationService.showShoppingVerificationNotification(
+    await _notificationService
+        .showShoppingVerificationNotification(
       title: "Alışveriş doğrulaması algılandı 🛒",
       body:
       "$shoppingInfo tutarında bir alışveriş için "
           "doğrulama kodu algılandı. "
           "Bu alışverişi bekleme listene eklemek ister misin?",
+      merchantName: merchantName,
+      amount: amount,
     );
   }
 }

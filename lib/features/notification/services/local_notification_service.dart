@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:bagimlilik/features/bekleme_listesi/services/bekleme_listesi_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LocalNotificationService {
@@ -9,7 +12,8 @@ class LocalNotificationService {
   // ============================================================
 
   Future<void> initialize() async {
-    const androidSettings = AndroidInitializationSettings(
+    const androidSettings =
+    AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
 
@@ -19,14 +23,16 @@ class LocalNotificationService {
 
     await _plugin.initialize(
       settings,
-      onDidReceiveNotificationResponse: _onNotificationResponse,
+      onDidReceiveNotificationResponse:
+      _onNotificationResponse,
     );
 
     final androidImplementation =
     _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
-    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation
+        ?.requestNotificationsPermission();
   }
 
   // ============================================================
@@ -37,26 +43,31 @@ class LocalNotificationService {
     required String title,
     required String body,
   }) async {
-    final androidDetails = AndroidNotificationDetails(
+    final androidDetails =
+    AndroidNotificationDetails(
       'micro_intervention_channel',
       'Mikro Müdahaleler',
       channelDescription:
       'Alışveriş davranışlarına yönelik farkındalık bildirimleri',
       importance: Importance.high,
       priority: Priority.high,
-      styleInformation: BigTextStyleInformation(
+      styleInformation:
+      BigTextStyleInformation(
         body,
         contentTitle: title,
         summaryText: 'Sirius',
       ),
     );
 
-    final notificationDetails = NotificationDetails(
+    final notificationDetails =
+    NotificationDetails(
       android: androidDetails,
     );
 
     await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      DateTime.now()
+          .millisecondsSinceEpoch
+          .remainder(100000),
       title,
       body,
       notificationDetails,
@@ -70,8 +81,17 @@ class LocalNotificationService {
   Future<void> showShoppingVerificationNotification({
     required String title,
     required String body,
+    required String merchantName,
+    String? amount,
   }) async {
-    final androidDetails = AndroidNotificationDetails(
+    // Action'a aktarılacak bilgiler
+    final payload = jsonEncode({
+      'merchantName': merchantName,
+      'amount': amount,
+    });
+
+    final androidDetails =
+    AndroidNotificationDetails(
       'shopping_verification_channel',
       'Alışveriş Doğrulamaları',
       channelDescription:
@@ -79,20 +99,15 @@ class LocalNotificationService {
       importance: Importance.high,
       priority: Priority.high,
 
-      // ----------------------------------------------------------
-      // UZUN METİN
-      // ----------------------------------------------------------
-
-      styleInformation: BigTextStyleInformation(
+      // Uzun metin
+      styleInformation:
+      BigTextStyleInformation(
         body,
         contentTitle: title,
         summaryText: 'Sirius',
       ),
 
-      // ----------------------------------------------------------
-      // ACTIONLAR
-      // ----------------------------------------------------------
-
+      // Actionlar
       actions: <AndroidNotificationAction>[
         AndroidNotificationAction(
           'add_to_waiting_list',
@@ -109,15 +124,19 @@ class LocalNotificationService {
       ],
     );
 
-    final notificationDetails = NotificationDetails(
+    final notificationDetails =
+    NotificationDetails(
       android: androidDetails,
     );
 
     await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      DateTime.now()
+          .millisecondsSinceEpoch
+          .remainder(100000),
       title,
       body,
       notificationDetails,
+      payload: payload,
     );
   }
 
@@ -129,26 +148,92 @@ class LocalNotificationService {
       NotificationResponse response,
       ) {
     print(
-      '🔔 Notification action: ${response.actionId}',
+      "🔔 Notification action: ${response.actionId}",
     );
 
     switch (response.actionId) {
       case 'add_to_waiting_list':
-        print(
-          '🟢 Bekleme listesine al seçildi.',
-        );
+        _addToWaitingList(response);
         break;
 
       case 'skip':
         print(
-          '⚪ Şimdilik geç seçildi.',
+          "⚪ Şimdilik geç seçildi.",
         );
         break;
 
       default:
         print(
-          'ℹ️ Bildirime tıklandı.',
+          "ℹ️ Bildirime tıklandı.",
         );
+    }
+  }
+
+  // ============================================================
+  // BEKLEME LİSTESİNE EKLE
+  // ============================================================
+
+  Future<void> _addToWaitingList(
+      NotificationResponse response,
+      ) async {
+    try {
+      print(
+        "🟢 Bekleme listesine ekle seçildi.",
+      );
+
+      final payload = response.payload;
+
+      if (payload == null || payload.isEmpty) {
+        print(
+          "❌ Notification payload bulunamadı.",
+        );
+        return;
+      }
+
+      final data =
+      jsonDecode(payload)
+      as Map<String, dynamic>;
+
+      final merchantName =
+      data['merchantName']?.toString();
+
+      final amount =
+      data['amount']?.toString();
+
+      if (merchantName == null ||
+          merchantName.isEmpty) {
+        print(
+          "❌ İşyeri bilgisi bulunamadı.",
+        );
+        return;
+      }
+
+      print(
+        "🏪 İşyeri: $merchantName",
+      );
+
+      print(
+        "💰 Tutar: $amount",
+      );
+
+      final beklemeListesiService =
+      BeklemeListesiService();
+
+      await beklemeListesiService
+          .bildirimdenEkle(
+        merchantName: merchantName,
+        amount: amount,
+      );
+
+      print(
+        "✅ Alışveriş bekleme listesine eklendi.",
+      );
+    } catch (e, stackTrace) {
+      print(
+        "❌ Bekleme listesine ekleme hatası: $e",
+      );
+
+      print(stackTrace);
     }
   }
 }

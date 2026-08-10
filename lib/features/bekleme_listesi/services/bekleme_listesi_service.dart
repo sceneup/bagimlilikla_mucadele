@@ -115,5 +115,54 @@ class BeklemeListesiService {
       }
     }
   }
+  Future<void> bildirimdenEkle({
+    required String merchantName,
+    String? amount,
+  }) async {
+    debugPrint(
+      "🛒 Bildirimden bekleme listesine ekleme başladı.",
+    );
+
+    debugPrint(
+      "🏪 İşyeri: $merchantName",
+    );
+
+    debugPrint(
+      "💰 Tutar: $amount",
+    );
+
+    double? fiyat;
+
+    if (amount != null && amount.trim().isNotEmpty) {
+      final temizAmount = amount
+          .replaceAll('TL', '')
+          .replaceAll('tl', '')
+          .replaceAll('₺', '')
+          .trim()
+          .replaceAll('.', '')
+          .replaceAll(',', '.');
+
+      fiyat = double.tryParse(temizAmount);
+    }
+
+    final oge = BeklemeOgesi(
+      id: DateTime.now()
+          .millisecondsSinceEpoch
+          .toString(),
+      userId: currentUserId,
+
+      // İşyeri kategori olarak kaydedilecek
+      kategoriId: merchantName,
+
+      eklenmeTarihi: DateTime.now(),
+      fiyat: fiyat,
+    );
+
+    await ogeEkle(oge);
+
+    debugPrint(
+      "✅ Bildirimden bekleme listesine eklendi.",
+    );
+  }
 }
 
