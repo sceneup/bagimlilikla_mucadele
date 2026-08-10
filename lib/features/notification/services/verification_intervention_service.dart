@@ -11,17 +11,16 @@ class VerificationInterventionService {
     required String merchantName,
     String? amount,
   }) async {
-
     final shoppingInfo = amount != null
         ? "$merchantName üzerinden $amount TL"
         : merchantName;
 
-    await _notificationService.showMicroIntervention(
+    await _notificationService.showShoppingVerificationNotification(
       title: "Alışveriş doğrulaması algılandı 🛒",
       body:
-      "$shoppingInfo tutarında bir alışveriş için doğrulama kodu algılandı. "
+      "$shoppingInfo tutarında bir alışveriş için "
+          "doğrulama kodu algılandı. "
           "Bu alışverişi bekleme listene eklemek ister misin?",
     );
-
   }
 }

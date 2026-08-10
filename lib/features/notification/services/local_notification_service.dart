@@ -17,10 +17,11 @@ class LocalNotificationService {
       android: androidSettings,
     );
 
-    // Plugin'i başlat
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings,
+      onDidReceiveNotificationResponse: _onNotificationResponse,
+    );
 
-    // Android bildirim izni
     final androidImplementation =
     _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
@@ -29,7 +30,7 @@ class LocalNotificationService {
   }
 
   // ============================================================
-  // BİLDİRİM GÖNDER
+  // NORMAL MİKRO MÜDAHALE
   // ============================================================
 
   Future<void> showMicroIntervention({
@@ -43,11 +44,6 @@ class LocalNotificationService {
       'Alışveriş davranışlarına yönelik farkındalık bildirimleri',
       importance: Importance.high,
       priority: Priority.high,
-
-      // ========================================================
-      // UZUN METNİ GENİŞLETİLEBİLİR YAP
-      // ========================================================
-
       styleInformation: BigTextStyleInformation(
         body,
         contentTitle: title,
@@ -60,12 +56,99 @@ class LocalNotificationService {
     );
 
     await _plugin.show(
-      DateTime.now()
-          .millisecondsSinceEpoch
-          .remainder(100000),
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
       title,
       body,
       notificationDetails,
     );
+  }
+
+  // ============================================================
+  // ALIŞVERİŞ DOĞRULAMA BİLDİRİMİ
+  // ============================================================
+
+  Future<void> showShoppingVerificationNotification({
+    required String title,
+    required String body,
+  }) async {
+    final androidDetails = AndroidNotificationDetails(
+      'shopping_verification_channel',
+      'Alışveriş Doğrulamaları',
+      channelDescription:
+      'Alışveriş doğrulama bildirimleri',
+      importance: Importance.high,
+      priority: Priority.high,
+
+      // ----------------------------------------------------------
+      // UZUN METİN
+      // ----------------------------------------------------------
+
+      styleInformation: BigTextStyleInformation(
+        body,
+        contentTitle: title,
+        summaryText: 'Sirius',
+      ),
+
+      // ----------------------------------------------------------
+      // ACTIONLAR
+      // ----------------------------------------------------------
+
+      actions: <AndroidNotificationAction>[
+        AndroidNotificationAction(
+          'add_to_waiting_list',
+          'Bekleme listesine al',
+          showsUserInterface: true,
+          cancelNotification: true,
+        ),
+        AndroidNotificationAction(
+          'skip',
+          'Şimdilik geç',
+          showsUserInterface: true,
+          cancelNotification: true,
+        ),
+      ],
+    );
+
+    final notificationDetails = NotificationDetails(
+      android: androidDetails,
+    );
+
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      notificationDetails,
+    );
+  }
+
+  // ============================================================
+  // ACTION CEVABI
+  // ============================================================
+
+  void _onNotificationResponse(
+      NotificationResponse response,
+      ) {
+    print(
+      '🔔 Notification action: ${response.actionId}',
+    );
+
+    switch (response.actionId) {
+      case 'add_to_waiting_list':
+        print(
+          '🟢 Bekleme listesine al seçildi.',
+        );
+        break;
+
+      case 'skip':
+        print(
+          '⚪ Şimdilik geç seçildi.',
+        );
+        break;
+
+      default:
+        print(
+          'ℹ️ Bildirime tıklandı.',
+        );
+    }
   }
 }
