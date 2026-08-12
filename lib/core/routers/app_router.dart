@@ -2,7 +2,6 @@ import 'package:bagimlilik/core/routers/main_shell.dart';
 import 'package:bagimlilik/features/anasayfa/views/anasayfa_view.dart';
 import 'package:bagimlilik/features/anket/views/anket_views.dart';
 import 'package:bagimlilik/features/bekleme_listesi/views/bekleme_listesi_view.dart';
-import 'package:bagimlilik/features/bilgi/views/bilgi_view.dart';
 import 'package:bagimlilik/features/giris/views/giris_views.dart';
 import 'package:bagimlilik/features/kayit/views/kayit_detay_views.dart';
 import 'package:bagimlilik/features/kayit/views/kayit_views.dart';
