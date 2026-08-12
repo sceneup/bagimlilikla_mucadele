@@ -4,6 +4,7 @@ class BeklemeOgesi {
   final String id;
   final String? userId;
   final String kategoriId;
+  final String? tetikleyiciId;
   final DateTime eklenmeTarihi;
   final double? fiyat;
 
@@ -11,60 +12,76 @@ class BeklemeOgesi {
     required this.id,
     this.userId,
     required this.kategoriId,
+    this.tetikleyiciId,
     required this.eklenmeTarihi,
     this.fiyat,
   });
 
-  Duration get kalanSure {
-    final hedefZaman = eklenmeTarihi.add(
+  DateTime get bitisZamani {
+    return eklenmeTarihi.add(
       const Duration(hours: bekleSuresiSaat),
     );
-    final kalan = hedefZaman.difference(DateTime.now());
-    return kalan.isNegative ? Duration.zero : kalan;
+  }
+
+  Duration get kalanSure {
+    final kalan =
+    bitisZamani.difference(DateTime.now());
+
+    if (kalan.isNegative) {
+      return Duration.zero;
+    }
+
+    return kalan;
   }
 
   double get ilerlemeOrani {
-    final gecenDakika = DateTime.now().difference(eklenmeTarihi).inMinutes;
-    final toplamDakika = bekleSuresiSaat * 60;
-    return (gecenDakika / toplamDakika).clamp(0.0, 1.0);
+    final gecenDakika = DateTime.now()
+        .difference(eklenmeTarihi)
+        .inMinutes;
+
+    const toplamDakika =
+        bekleSuresiSaat * 60;
+
+    return (gecenDakika / toplamDakika)
+        .clamp(0.0, 1.0);
   }
 
-  bool get suresiDoldu => kalanSure == Duration.zero;
-
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    if (userId != null) 'user_id': userId,
-    'category_id': kategoriId,
-    'created_at': eklenmeTarihi.toIso8601String(),
-    'kategoriId': kategoriId,
-    'eklenmeTarihi': eklenmeTarihi.toIso8601String(),
-    'price': fiyat,
-    'fiyat': fiyat,
-  };
+  bool get suresiDoldu {
+    return DateTime.now().isAfter(
+      bitisZamani,
+    );
+  }
 
   Map<String, dynamic> toSupabaseMap() {
-    final map = <String, dynamic>{
+    return {
       'id': id,
+      'user_id': userId,
       'category_id': kategoriId,
+      'trigger_id': tetikleyiciId,
       'created_at': eklenmeTarihi.toIso8601String(),
       'price': fiyat,
     };
-    if (userId != null) {
-      map['user_id'] = userId;
-    }
-    return map;
   }
 
-  factory BeklemeOgesi.fromJson(Map<String, dynamic> json) {
-    final rawPrice = json['price'] ?? json['fiyat'];
+  factory BeklemeOgesi.fromSupabase(
+      Map<String, dynamic> json,
+      ) {
+    final rawPrice = json['price'];
+
     return BeklemeOgesi(
       id: json['id'].toString(),
-      userId: (json['user_id'] ?? json['userId'])?.toString(),
-      kategoriId: (json['category_id'] ?? json['kategoriId']) as String,
-      eklenmeTarihi: DateTime.parse(
-        (json['created_at'] ?? json['eklenmeTarihi']) as String,
+      userId: json['user_id']?.toString(),
+      kategoriId:
+      json['category_id'].toString(),
+      tetikleyiciId:
+      json['trigger_id']?.toString(),
+      eklenmeTarihi:
+      DateTime.parse(
+        json['created_at'].toString(),
       ),
-      fiyat: rawPrice != null ? (rawPrice as num).toDouble() : null,
+      fiyat: rawPrice == null
+          ? null
+          : (rawPrice as num).toDouble(),
     );
   }
 }

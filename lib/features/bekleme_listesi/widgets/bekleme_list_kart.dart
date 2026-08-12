@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 
 class BeklemeListKart extends StatelessWidget {
   final BeklemeOgesi oge;
-  final Kategori kategori;
+  final Kategori? kategori;
   final VoidCallback? onTap;
 
   const BeklemeListKart({
     required this.oge,
-    required this.kategori,
+    this.kategori,
     this.onTap,
     super.key,
   });
@@ -19,9 +19,12 @@ class BeklemeListKart extends StatelessWidget {
   Widget build(BuildContext context) {
     final suresiDoldu = oge.suresiDoldu;
     final kalan = oge.kalanSure;
+
     final durumMetni = suresiDoldu
         ? 'Süre doldu, tekrar değerlendir'
         : '${kalan.inHours} saat kaldı';
+
+    final kategoriBulundu = kategori != null;
 
     return InkWell(
       onTap: onTap,
@@ -39,21 +42,43 @@ class BeklemeListKart extends StatelessWidget {
               height: 40,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: kategori.arkaplanRengi,
+                color: kategoriBulundu
+                    ? kategori!.arkaplanRengi
+                    : const Color(0xFFEFEFEF),
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(kategori.ikon, color: kategori.simgeRengi, size: 20),
+              child: Icon(
+                kategoriBulundu
+                    ? kategori!.ikon
+                    : Icons.storefront,
+                color: kategoriBulundu
+                    ? kategori!.simgeRengi
+                    : const Color(0xFF7A7A7A),
+                size: 20,
+              ),
             ),
+
             const SizedBox(width: 20),
+
             Expanded(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment:
+                CrossAxisAlignment.start,
                 children: [
-                  Text(kategori.isim, style: const TextStyle(fontSize: 18)),
+                  Text(
+                    kategoriBulundu
+                        ? kategori!.isim
+                        : oge.kategoriId,
+                    style: const TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
                   Text(
                     durumMetni,
                     style: TextStyle(
-                      color: suresiDoldu ? Colors.redAccent : AppColors.primary,
+                      color: suresiDoldu
+                          ? Colors.redAccent
+                          : AppColors.primary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -61,14 +86,19 @@ class BeklemeListKart extends StatelessWidget {
                 ],
               ),
             ),
+
             SizedBox(
               width: 80,
               child: LinearProgressIndicator(
                 value: oge.ilerlemeOrani,
                 minHeight: 8,
-                borderRadius: BorderRadius.circular(10),
-                color: suresiDoldu ? Colors.redAccent : AppColors.primary,
-                backgroundColor: AppColors.secondaryContainer,
+                borderRadius:
+                BorderRadius.circular(10),
+                color: suresiDoldu
+                    ? Colors.redAccent
+                    : AppColors.primary,
+                backgroundColor:
+                AppColors.secondaryContainer,
               ),
             ),
           ],

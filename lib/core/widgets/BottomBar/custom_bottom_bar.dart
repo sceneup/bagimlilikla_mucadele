@@ -1,4 +1,3 @@
-import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/BottomBar/bottom_bar_item.dart';
 import 'package:flutter/material.dart';
 

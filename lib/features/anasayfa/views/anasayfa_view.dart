@@ -1,11 +1,11 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/BeklemeOzet/bekleme_list_baslik.dart';
+import 'package:bagimlilik/features/anasayfa/widgets/BeklemeOzet/bekleme_listesi_bolumu.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HaftalikKart/haftalik_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/HedefKart/hedef_kart.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/alisveris_durtu_kontrol.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/appbar_actions.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/BeklemeKart/bekleme_list_baslik.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/BeklemeKart/bekleme_listesi_bolumu.dart';
 import 'package:bagimlilik/features/anasayfa/widgets/GunlukDurumKart/gunluk_durum_kart.dart';
 import 'package:flutter/material.dart';
 

@@ -1,6 +1,4 @@
 import 'package:bagimlilik/features/bekleme_listesi/viewmodels/bekleme_listesi_view_model.dart';
-import 'package:bagimlilik/features/durtu_kaydi/models/durtu_kaydi.dart';
-import 'package:bagimlilik/features/durtu_kaydi/viewmodels/durtu_kaydi_view_model.dart';
 import 'package:bagimlilik/features/odak_kontrolu/models/odak_kontrolu_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,7 +7,10 @@ import 'package:go_router/go_router.dart';
 class SonucAdimi extends ConsumerStatefulWidget {
   final OdakKontroluState state;
 
-  const SonucAdimi({required this.state, super.key});
+  const SonucAdimi({
+    required this.state,
+    super.key,
+  });
 
   @override
   ConsumerState<SonucAdimi> createState() => _SonucAdimiState();
@@ -19,12 +20,14 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
     with SingleTickerProviderStateMixin {
   late final AnimationController _nefesController;
   late final Animation<double> _nefesOlcek;
+
   String _nefesMetni = 'Nefes Al';
   bool _butonlarAktif = false;
 
   @override
   void initState() {
     super.initState();
+
     _nefesController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -37,15 +40,25 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
         }
       })
       ..repeat(reverse: true);
-    _nefesOlcek = Tween<double>(begin: 0.88, end: 1.15).animate(
-      CurvedAnimation(parent: _nefesController, curve: Curves.easeInOut),
+
+    _nefesOlcek = Tween<double>(
+      begin: 0.88,
+      end: 1.15,
+    ).animate(
+      CurvedAnimation(
+        parent: _nefesController,
+        curve: Curves.easeInOut,
+      ),
     );
 
-    Future.delayed(const Duration(seconds: 4), () {
-      if (mounted) {
-        setState(() => _butonlarAktif = true);
-      }
-    });
+    Future.delayed(
+      const Duration(seconds: 4),
+          () {
+        if (mounted) {
+          setState(() => _butonlarAktif = true);
+        }
+      },
+    );
   }
 
   @override
@@ -53,21 +66,6 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
     _nefesController.dispose();
     super.dispose();
   }
-
-  void _durtuKaydiniTut(DurtuSonucu sonuc) {
-    final kategoriId = widget.state.seciliKategori?.id;
-    final tetikleyiciId = widget.state.seciliTetikleyici?.id;
-    if (kategoriId != null && tetikleyiciId != null) {
-      ref
-          .read(durtuKaydiViewModelProvider.notifier)
-          .kaydet(
-            kategoriId: kategoriId,
-            tetikleyiciId: tetikleyiciId,
-            sonuc: sonuc,
-          );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -75,9 +73,13 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
       child: Column(
         children: [
           const SizedBox(height: 8),
+
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+            padding: const EdgeInsets.symmetric(
+              vertical: 32,
+              horizontal: 20,
+            ),
             decoration: BoxDecoration(
               color: const Color(0xFFE1F5EE),
               borderRadius: BorderRadius.circular(16),
@@ -91,6 +93,7 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
                     animation: _nefesOlcek,
                     builder: (context, child) {
                       final oran = _nefesOlcek.value;
+
                       return Stack(
                         alignment: Alignment.center,
                         children: [
@@ -133,7 +136,9 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
                     },
                   ),
                 ),
+
                 const SizedBox(height: 10),
+
                 Text(
                   _nefesMetni,
                   style: const TextStyle(
@@ -143,7 +148,9 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
                     letterSpacing: 0.5,
                   ),
                 ),
+
                 const SizedBox(height: 18),
+
                 Text(
                   '${widget.state.seciliKategori?.isim} almak istiyorsun',
                   textAlign: TextAlign.center,
@@ -153,10 +160,12 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
                     color: Color(0xFF04342C),
                   ),
                 ),
+
                 const SizedBox(height: 8),
+
                 Text(
                   '${widget.state.seciliTetikleyici?.isim} seni tetikledi.\n'
-                  'Şimdi almazsan hayatında ne değişir?',
+                      'Şimdi almazsan hayatında ne değişir?',
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
@@ -167,7 +176,13 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
               ],
             ),
           ),
+
           const SizedBox(height: 24),
+
+          // ============================================================
+          // BEKLEME LİSTESİNE EKLE
+          // ============================================================
+
           AnimatedOpacity(
             opacity: _butonlarAktif ? 1 : 0.35,
             duration: const Duration(milliseconds: 400),
@@ -177,20 +192,36 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
               child: ElevatedButton(
                 onPressed: _butonlarAktif
                     ? () {
-                        final kategoriId = widget.state.seciliKategori?.id;
-                        if (kategoriId != null) {
-                          ref
-                              .read(beklemeListesiViewModelProvider.notifier)
-                              .ekle(kategoriId);
-                        }
-                        _durtuKaydiniTut(DurtuSonucu.beklemeyeEklendi);
-                        context.pop();
-                      }
+                  final kategoriId =
+                      widget.state.seciliKategori?.id;
+
+                  final tetikleyiciId =
+                      widget.state.seciliTetikleyici?.id;
+
+                  if (kategoriId != null) {
+                    ref
+                        .read(
+                      beklemeListesiViewModelProvider
+                          .notifier,
+                    )
+                        .ekle(
+                      kategoriId,
+                      tetikleyiciId: tetikleyiciId,
+                    );
+                  }
+
+                  // _durtuKaydiniTut(
+                  //   DurtuSonucu.beklemeyeEklendi,
+                  // );
+
+                  context.pop();
+                }
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F6E56),
                   foregroundColor: Colors.white,
-                  disabledBackgroundColor: const Color(0xFF0F6E56),
+                  disabledBackgroundColor:
+                  const Color(0xFF0F6E56),
                   disabledForegroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -203,7 +234,13 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
               ),
             ),
           ),
+
           const SizedBox(height: 12),
+
+          // ============================================================
+          // VAZGEÇ
+          // ============================================================
+
           AnimatedOpacity(
             opacity: _butonlarAktif ? 1 : 0.35,
             duration: const Duration(milliseconds: 400),
@@ -213,15 +250,20 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
               child: ElevatedButton(
                 onPressed: _butonlarAktif
                     ? () {
-                        _durtuKaydiniTut(DurtuSonucu.vazgecildi);
-                        context.pop();
-                      }
+                  // _durtuKaydiniTut(
+                  //   DurtuSonucu.vazgecildi,
+                  // );
+
+                  context.pop();
+                }
                     : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFEAF3DE),
                   foregroundColor: const Color(0xFF27500A),
-                  disabledBackgroundColor: const Color(0xFFEAF3DE),
-                  disabledForegroundColor: const Color(0xFF27500A),
+                  disabledBackgroundColor:
+                  const Color(0xFFEAF3DE),
+                  disabledForegroundColor:
+                  const Color(0xFF27500A),
                   elevation: 0,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -234,8 +276,10 @@ class _SonucAdimiState extends ConsumerState<SonucAdimi>
               ),
             ),
           ),
+
           if (!_butonlarAktif) ...[
             const SizedBox(height: 12),
+
             Text(
               'Bir nefes al, birazdan devam edebilirsin...',
               textAlign: TextAlign.center,

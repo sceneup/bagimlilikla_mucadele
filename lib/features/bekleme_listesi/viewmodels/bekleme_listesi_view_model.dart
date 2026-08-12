@@ -1,82 +1,137 @@
 import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
-import 'package:bagimlilik/features/bekleme_listesi/services/bekleme_listesi_service.dart';
+import 'package:bagimlilik/features/bekleme_listesi/repositories/bekleme_listesi_repository.dart';
 import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
 import 'package:bagimlilik/features/odak_kontrolu/services/kategori_service.dart';
-import 'package:bagimlilik/features/rozetler/services/rozet_service.dart';
-import 'package:bagimlilik/features/rozetler/viewmodels/rozet_view_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-int _bildirimIdUret(String ogeId) => ogeId.hashCode & 0x7FFFFFFF;
+int _bildirimIdUret(String ogeId) {
+  return int.tryParse(ogeId) ??
+      (ogeId.hashCode & 0x7FFFFFFF);
+}
 
-class BeklemeListesiViewModel extends AsyncNotifier<List<BeklemeOgesi>> {
-  final _service = BeklemeListesiService();
-  final _rozetService = RozetService();
+class BeklemeListesiViewModel
+    extends AsyncNotifier<List<BeklemeOgesi>> {
+  final _repository = BeklemeListesiRepository();
   final _bildirimService = BildirimService();
   final _kategoriService = KategoriService();
 
   @override
   Future<List<BeklemeOgesi>> build() async {
-    final liste = await _service.listeyiGetir();
+    final liste = await _repository.listeyiGetir();
+
     final aktifler = <BeklemeOgesi>[];
-    var rozetKazanildi = false;
+    final silinecekIdler = <String>[];
 
     for (final oge in liste) {
       if (oge.suresiDoldu) {
-        await _rozetService.rozetEkle('rozet_${oge.id}', oge.kategoriId);
-        await _service.ogeSil(oge.id);
-        rozetKazanildi = true;
+        silinecekIdler.add(oge.id);
       } else {
         aktifler.add(oge);
       }
     }
 
-    if (rozetKazanildi) {
-      ref.invalidate(rozetViewModelProvider);
+    // Süresi dolmuş kayıtları tek seferde sil.
+    if (silinecekIdler.isNotEmpty) {
+      await _repository.ogeleriSil(
+        silinecekIdler,
+      );
     }
 
     return aktifler;
   }
 
-  Future<void> ekle(String kategoriId, {double? fiyat}) async {
+  Future<void> ekle(
+      String kategoriId, {
+        String? tetikleyiciId,
+        double? fiyat,
+      }) async {
     final mevcut = await future;
-    final userId = _service.currentUserId;
+
+    final userId = _repository.currentUserId;
+
     final yeniOge = BeklemeOgesi(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now()
+          .millisecondsSinceEpoch
+          .toString(),
       userId: userId,
       kategoriId: kategoriId,
+      tetikleyiciId: tetikleyiciId,
       eklenmeTarihi: DateTime.now(),
       fiyat: fiyat,
     );
-    final guncelListe = [...mevcut, yeniOge];
+
+    // Önce UI'ı güncelle.
+    final guncelListe = [
+      ...mevcut,
+      yeniOge,
+    ];
 
     state = AsyncData(guncelListe);
-    await _service.ogeEkle(yeniOge);
 
-    final kategori = _kategoriService
-        .kategorileriGetir()
-        .firstWhere((k) => k.id == kategoriId);
+    // Veritabanına kaydet.
+    await _repository.ogeEkle(
+      yeniOge,
+    );
+
+    // Hatırlatıcı için kategori adını bul.
+    //
+    // Örneğin:
+    // giyim       → Giyim
+    // elektronik → Elektronik
+    // TRENDYOL    → TRENDYOL
+    //
+    // Trendyol sabit kategori listesinde yoksa
+    // firstWhere hata vermesin.
+    final kategoriler =
+    _kategoriService.kategorileriGetir();
+
+    String kategoriIsim = kategoriId;
+
+    for (final kategori in kategoriler) {
+      if (kategori.id == kategoriId) {
+        kategoriIsim = kategori.isim;
+        break;
+      }
+    }
 
     await _bildirimService.hatirlaticiKur(
-      id: _bildirimIdUret(yeniOge.id),
-      kategoriIsim: kategori.isim,
+      id: _bildirimIdUret(
+        yeniOge.id,
+      ),
+      kategoriIsim: kategoriIsim,
       tetikTarihi: yeniOge.eklenmeTarihi.add(
-        const Duration(hours: BeklemeOgesi.bekleSuresiSaat),
+        const Duration(
+          hours: BeklemeOgesi.bekleSuresiSaat,
+        ),
       ),
     );
   }
 
   Future<void> kaldir(String id) async {
     final mevcut = await future;
-    final guncelListe = mevcut.where((oge) => oge.id != id).toList();
 
+    final guncelListe = mevcut
+        .where(
+          (oge) => oge.id != id,
+    )
+        .toList();
+
+    // Önce UI'ı güncelle.
     state = AsyncData(guncelListe);
-    await _service.ogeSil(id);
-    await _bildirimService.hatirlaticiIptalEt(_bildirimIdUret(id));
+
+    // Supabase'den sil.
+    await _repository.ogeSil(id);
+
+    // Hatırlatıcıyı iptal et.
+    await _bildirimService.hatirlaticiIptalEt(
+      _bildirimIdUret(id),
+    );
   }
 }
 
 final beklemeListesiViewModelProvider =
-    AsyncNotifierProvider<BeklemeListesiViewModel, List<BeklemeOgesi>>(
-      BeklemeListesiViewModel.new,
-    );
-
+AsyncNotifierProvider<
+    BeklemeListesiViewModel,
+    List<BeklemeOgesi>>(
+  BeklemeListesiViewModel.new,
+);

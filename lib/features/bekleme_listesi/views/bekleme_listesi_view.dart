@@ -1,7 +1,8 @@
 import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
-import 'package:bagimlilik/features/anasayfa/widgets/BeklemeKart/bekleme_list_kart.dart';
 import 'package:bagimlilik/features/bekleme_listesi/viewmodels/bekleme_listesi_view_model.dart';
+import 'package:bagimlilik/features/bekleme_listesi/widgets/bekleme_list_kart.dart';
+import 'package:bagimlilik/features/odak_kontrolu/models/kategori.dart';
 import 'package:bagimlilik/features/odak_kontrolu/services/kategori_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,16 +12,26 @@ class BeklemeListesiView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final asyncListe = ref.watch(beklemeListesiViewModelProvider);
+    final asyncListe = ref.watch(
+      beklemeListesiViewModelProvider,
+    );
+
     final kategoriler = KategoriService().kategorileriGetir();
 
     return Scaffold(
       backgroundColor: AppColors.secondaryContainer2,
-      appBar: const CustomAppBar(title: 'Bekleme Listem', centerTitle: false),
+      appBar: const CustomAppBar(
+        title: 'Bekleme Listem',
+        centerTitle: false,
+      ),
       body: asyncListe.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: CircularProgressIndicator(),
+        ),
         error: (error, stackTrace) => Center(
-          child: Text('Liste yüklenirken bir hata oluştu: $error'),
+          child: Text(
+            'Liste yüklenirken bir hata oluştu: $error',
+          ),
         ),
         data: (liste) {
           if (liste.isEmpty) {
@@ -30,7 +41,10 @@ class BeklemeListesiView extends ConsumerWidget {
                 child: Text(
                   'Bekleme listende henüz bir şey yok.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black54, fontSize: 16),
+                  style: TextStyle(
+                    color: Colors.black54,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             );
@@ -39,13 +53,27 @@ class BeklemeListesiView extends ConsumerWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: liste.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            separatorBuilder: (context, index) =>
+            const SizedBox(height: 12),
             itemBuilder: (context, index) {
               final oge = liste[index];
-              final kategori = kategoriler.firstWhere(
-                (k) => k.id == oge.kategoriId,
-                orElse: () => kategoriler.last,
-              );
+
+              // Sabit kategorilerde varsa ilgili kategori bulunur.
+              // Örneğin:
+              // giyim      -> Giyim
+              // kozmetik  -> Kozmetik & Bakım
+              //
+              // Sabit listede yoksa null kalır.
+              // Örneğin:
+              // TRENDYOL   -> null
+              Kategori? kategori;
+
+              for (final item in kategoriler) {
+                if (item.id == oge.kategoriId) {
+                  kategori = item;
+                  break;
+                }
+              }
 
               return Dismissible(
                 key: ValueKey(oge.id),
@@ -57,14 +85,22 @@ class BeklemeListesiView extends ConsumerWidget {
                     color: Colors.redAccent,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.delete, color: Colors.white),
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.white,
+                  ),
                 ),
                 onDismissed: (_) {
                   ref
-                      .read(beklemeListesiViewModelProvider.notifier)
+                      .read(
+                    beklemeListesiViewModelProvider.notifier,
+                  )
                       .kaldir(oge.id);
                 },
-                child: BeklemeListKart(oge: oge, kategori: kategori),
+                child: BeklemeListKart(
+                  oge: oge,
+                  kategori: kategori,
+                ),
               );
             },
           );

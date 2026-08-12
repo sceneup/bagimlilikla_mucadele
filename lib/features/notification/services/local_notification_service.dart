@@ -1,6 +1,7 @@
 import 'dart:convert';
-
-import 'package:bagimlilik/features/bekleme_listesi/services/bekleme_listesi_service.dart';
+import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
+import 'package:bagimlilik/features/bekleme_listesi/repositories/bekleme_listesi_repository.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LocalNotificationService {
@@ -147,7 +148,7 @@ class LocalNotificationService {
   void _onNotificationResponse(
       NotificationResponse response,
       ) {
-    print(
+    debugPrint(
       "🔔 Notification action: ${response.actionId}",
     );
 
@@ -157,13 +158,13 @@ class LocalNotificationService {
         break;
 
       case 'skip':
-        print(
+        debugPrint(
           "⚪ Şimdilik geç seçildi.",
         );
         break;
 
       default:
-        print(
+        debugPrint(
           "ℹ️ Bildirime tıklandı.",
         );
     }
@@ -177,22 +178,21 @@ class LocalNotificationService {
       NotificationResponse response,
       ) async {
     try {
-      print(
+      debugPrint(
         "🟢 Bekleme listesine ekle seçildi.",
       );
 
       final payload = response.payload;
 
       if (payload == null || payload.isEmpty) {
-        print(
+        debugPrint(
           "❌ Notification payload bulunamadı.",
         );
         return;
       }
 
       final data =
-      jsonDecode(payload)
-      as Map<String, dynamic>;
+      jsonDecode(payload) as Map<String, dynamic>;
 
       final merchantName =
       data['merchantName']?.toString();
@@ -202,38 +202,61 @@ class LocalNotificationService {
 
       if (merchantName == null ||
           merchantName.isEmpty) {
-        print(
+        debugPrint(
           "❌ İşyeri bilgisi bulunamadı.",
         );
         return;
       }
 
-      print(
+      debugPrint(
         "🏪 İşyeri: $merchantName",
       );
 
-      print(
+      debugPrint(
         "💰 Tutar: $amount",
       );
 
-      final beklemeListesiService =
-      BeklemeListesiService();
+      // Bildirimden gelen fiyatı sayıya çevir.
+      double? fiyat;
 
-      await beklemeListesiService
-          .bildirimdenEkle(
-        merchantName: merchantName,
-        amount: amount,
+      if (amount != null && amount.isNotEmpty) {
+        final temizTutar = amount
+            .replaceAll('₺', '')
+            .replaceAll('TL', '')
+            .replaceAll(' ', '')
+            .replaceAll('.', '')
+            .replaceAll(',', '.');
+
+        fiyat = double.tryParse(temizTutar);
+      }
+
+      final repository =
+      BeklemeListesiRepository();
+
+      final yeniOge = BeklemeOgesi(
+        id: DateTime.now()
+            .millisecondsSinceEpoch
+            .toString(),
+        userId: repository.currentUserId,
+        kategoriId: merchantName,
+        tetikleyiciId: merchantName,
+        eklenmeTarihi: DateTime.now(),
+        fiyat: fiyat,
       );
 
-      print(
+      await repository.ogeEkle(
+        yeniOge,
+      );
+
+      debugPrint(
         "✅ Alışveriş bekleme listesine eklendi.",
       );
     } catch (e, stackTrace) {
-      print(
+      debugPrint(
         "❌ Bekleme listesine ekleme hatası: $e",
       );
 
-      print(stackTrace);
+      debugPrint(stackTrace.toString());
     }
   }
 }
