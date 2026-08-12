@@ -7,6 +7,7 @@ import 'package:bagimlilik/features/kayit/views/kayit_detay_views.dart';
 import 'package:bagimlilik/features/kayit/views/kayit_views.dart';
 import 'package:bagimlilik/features/notification/views/notification_view.dart';
 import 'package:bagimlilik/features/odak_kontrolu/views/odak_kontrolu_view.dart';
+import 'package:bagimlilik/features/profil/views/hakkinda_view.dart';
 import 'package:bagimlilik/features/profil/views/profil_view.dart';
 import 'package:go_router/go_router.dart';
 
@@ -35,6 +36,12 @@ final GoRouter appRouter = GoRouter(
       path: '/bekleme-listesi',
       builder: (context, state) {
         return const BeklemeListesiView();
+      },
+    ),
+    GoRoute(
+      path: '/hakkinda',
+      builder: (context, state) {
+        return const HakkindaView();
       },
     ),
     StatefulShellRoute.indexedStack(

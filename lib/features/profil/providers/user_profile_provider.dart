@@ -29,4 +29,41 @@ class UserProfileNotifier extends AsyncNotifier<UserProfile?> {
           () => _repository.getCurrentProfile(),
     );
   }
+
+  Future<bool> updateProfile({
+    String? fullName,
+    String? username,
+    String? avatar,
+    DateTime? birthDate,
+    String? gender,
+    String? maritalStatus,
+    String? livingStatus,
+    String? educationLevel,
+    String? employmentStatus,
+  }) async {
+    try {
+      final updatedProfile = await _repository.updateProfile(
+        fullName: fullName,
+        username: username,
+        avatar: avatar,
+        birthDate: birthDate,
+        gender: gender,
+        maritalStatus: maritalStatus,
+        livingStatus: livingStatus,
+        educationLevel: educationLevel,
+        employmentStatus: employmentStatus,
+      );
+
+      if (updatedProfile == null) {
+        return false;
+      }
+
+      state = AsyncData(updatedProfile);
+
+      return true;
+    } catch (e, stackTrace) {
+      state = AsyncError(e, stackTrace);
+      return false;
+    }
+  }
 }
