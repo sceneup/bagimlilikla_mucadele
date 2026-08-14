@@ -34,7 +34,7 @@ class KayitOlButton extends ConsumerWidget {
                 await Future.delayed(const Duration(seconds: 2));
 
                 if (context.mounted) {
-                  context.go("/giris");
+                  context.go("/anket");
                 }
               }
             }

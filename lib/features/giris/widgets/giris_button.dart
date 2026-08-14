@@ -9,45 +9,64 @@ class GirisButton extends ConsumerWidget {
   const GirisButton({super.key});
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
-    final vm = ref.read(girisViewModelProvider.notifier);
+  Widget build(
+      BuildContext context,
+      WidgetRef ref,
+      ) {
+    final vm = ref.read(
+      girisViewModelProvider.notifier,
+    );
+
     return Column(
       spacing: 10,
       children: [
         CustomButton(
-            text: "GİRİŞ",
-            backgroundColor: AppColors.accent,
-            fontSize: 20,
-            height: 50,
-            onPressed: () async{
-              if (!vm.formKey.currentState!.validate()) {
-                return;
-              }
-
-              final success = await ref
-                  .read(girisViewModelProvider.notifier)
-                  .login();
-
-              if (success && context.mounted) {
-                context.go("/anasayfa");
-              }
+          text: "GİRİŞ",
+          backgroundColor: AppColors.accent,
+          fontSize: 20,
+          height: 50,
+          onPressed: () async {
+            if (!vm.formKey.currentState!.validate()) {
+              return;
             }
+
+            final route = await ref
+                .read(girisViewModelProvider.notifier)
+                .login();
+
+            if (route != null && context.mounted) {
+              context.go(route);
+            }
+          },
         ),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 20,
           children: [
-            const Text("Hesabın yok mu?",
-              style:TextStyle(color: AppColors.textSecondary,fontSize: 16) ,),
+            const Text(
+              "Hesabın yok mu?",
+              style: TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 16,
+              ),
+            ),
+
             TextButton(
-              onPressed: (){
+              onPressed: () {
                 context.go("/register");
               },
-              child: const Text("Kayıt Ol",
-                  style:TextStyle(color: AppColors.accent,fontSize: 18,fontWeight: FontWeight.bold)),
-            ) ,
+              child: const Text(
+                "Kayıt Ol",
+                style: TextStyle(
+                  color: AppColors.accent,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ],
-        )
+        ),
       ],
     );
   }

@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bagimlilik/features/anket/repositories/survey_repository.dart';
 
 class GirisViewModel extends Notifier<GirisState> {
   late final AuthService _authService;
-
+  final SurveyRepository _surveyRepository =
+  SurveyRepository();
   final formKey = GlobalKey<FormState>();
 
   final usernameController = TextEditingController();
@@ -26,7 +28,7 @@ class GirisViewModel extends Notifier<GirisState> {
     );
   }
 
-  Future<bool> login() async {
+  Future<String?> login() async {
     setLoading(true);
 
     EasyLoading.show(
@@ -50,7 +52,7 @@ class GirisViewModel extends Notifier<GirisState> {
           "Kullanıcı adı veya şifre hatalı.",
         );
 
-        return false;
+        return null;
       }
 
       // Email + şifre ile Supabase Auth
@@ -64,30 +66,45 @@ class GirisViewModel extends Notifier<GirisState> {
           "Kullanıcı adı veya şifre hatalı.",
         );
 
-        return false;
+        return null;
       }
+
+      // --------------------------------------------------
+      // ANKET KONTROLÜ
+      // --------------------------------------------------
+
+      final anketGerekli =
+      await _surveyRepository.isSurveyDue();
 
       EasyLoading.dismiss();
 
-      return true;
+      if (anketGerekli) {
+        return '/anket';
+      }
+
+      return '/anasayfa';
 
     } on AuthException catch (e) {
-      debugPrint("AUTH ERROR: ${e.message}");
+      debugPrint(
+        "AUTH ERROR: ${e.message}",
+      );
 
       EasyLoading.showError(
         "Kullanıcı adı veya şifre hatalı.",
       );
 
-      return false;
+      return null;
 
     } catch (e) {
-      debugPrint("LOGIN ERROR: $e");
+      debugPrint(
+        "LOGIN ERROR: $e",
+      );
 
       EasyLoading.showError(
         "Giriş yapılırken bir hata oluştu.",
       );
 
-      return false;
+      return null;
 
     } finally {
       setLoading(false);

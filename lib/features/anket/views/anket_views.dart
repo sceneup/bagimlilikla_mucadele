@@ -8,6 +8,7 @@ import 'package:bagimlilik/features/anket/widgets/anketcard/anket_soru_card.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class AnketViews extends ConsumerWidget {
   const AnketViews({super.key});
@@ -116,7 +117,7 @@ class AnketViews extends ConsumerWidget {
                             anketState.bolumler.length - 1
                             ? "Tamamla"
                             : "Devam Et",
-                        onPressed: () {
+                        onPressed: () async {
                           final viewModel =
                           ref.read(anketViewModelProvider.notifier);
 
@@ -130,6 +131,51 @@ class AnketViews extends ConsumerWidget {
                             return;
                           }
 
+                          // Son bölümdeysek anketi kaydet
+                          if (anketState.aktifBolumIndex ==
+                              anketState.bolumler.length - 1) {
+                            try {
+                              EasyLoading.show(
+                                status: 'Anket kaydediliyor...',
+                              );
+
+                              await viewModel.anketiTamamla();
+
+                              EasyLoading.dismiss();
+
+                              if (!context.mounted) return;
+
+                              EasyLoading.showSuccess(
+                                'Anket başarıyla tamamlandı.',
+                              );
+
+                              await Future.delayed(
+                                const Duration(milliseconds: 800),
+                              );
+
+                              if (!context.mounted) return;
+
+                              // Login ekranına yönlendir
+                              context.go('/giris');
+
+                            }catch (e) {
+                              EasyLoading.dismiss();
+
+                              if (!context.mounted) return;
+
+                              EasyLoading.showError(
+                                'Anket kaydedilemedi.',
+                              );
+
+                              debugPrint(
+                                'Anket kaydetme hatası: $e',
+                              );
+                            }
+
+                            return;
+                          }
+
+                          // Son bölüm değilse bir sonraki bölüme geç
                           viewModel.sonrakiBolumeGec();
                         },
                       ),
