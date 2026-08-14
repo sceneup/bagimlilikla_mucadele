@@ -1,20 +1,25 @@
 import 'dart:convert';
+import 'package:bagimlilik/features/notification/repositories/daily_behavior_stats_repository.dart';
 import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
 import 'package:bagimlilik/features/bekleme_listesi/repositories/bekleme_listesi_repository.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LocalNotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
   FlutterLocalNotificationsPlugin();
+  final DailyBehaviorStatsRepository _statsRepository =
+  DailyBehaviorStatsRepository();
+  final GoRouter router;
 
-  // ============================================================
-  // BAŞLAT + İZİN İSTE
-  // ============================================================
+  LocalNotificationService({
+    required this.router,
+  });
 
   Future<void> initialize() async {
-    const androidSettings =
-    AndroidInitializationSettings(
+    const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
 
@@ -36,9 +41,7 @@ class LocalNotificationService {
         ?.requestNotificationsPermission();
   }
 
-  // ============================================================
   // NORMAL MİKRO MÜDAHALE
-  // ============================================================
 
   Future<void> showMicroIntervention({
     required String title,
@@ -75,18 +78,15 @@ class LocalNotificationService {
     );
   }
 
-  // ============================================================
-  // ALIŞVERİŞ DOĞRULAMA BİLDİRİMİ
-  // ============================================================
-
   Future<void> showShoppingVerificationNotification({
     required String title,
     required String body,
     required String merchantName,
     String? amount,
   }) async {
-    // Action'a aktarılacak bilgiler
+    // SADECE BU BİLDİRİM İÇİN YÖNLENDİRME BİLGİSİ
     final payload = jsonEncode({
+      'type': 'waiting_list',
       'merchantName': merchantName,
       'amount': amount,
     });
@@ -100,7 +100,6 @@ class LocalNotificationService {
       importance: Importance.high,
       priority: Priority.high,
 
-      // Uzun metin
       styleInformation:
       BigTextStyleInformation(
         body,
@@ -116,6 +115,7 @@ class LocalNotificationService {
           showsUserInterface: true,
           cancelNotification: true,
         ),
+
         AndroidNotificationAction(
           'skip',
           'Şimdilik geç',
@@ -145,28 +145,92 @@ class LocalNotificationService {
   // ACTION CEVABI
   // ============================================================
 
-  void _onNotificationResponse(
+  Future<void> _onNotificationResponse(
       NotificationResponse response,
-      ) {
+      ) async {
     debugPrint(
-      "🔔 Notification action: ${response.actionId}",
+      '🔔 Notification action: ${response.actionId}',
     );
 
     switch (response.actionId) {
+    // --------------------------------------------------------
+    // BEKLEME LİSTESİNE EKLE BUTONU
+    // --------------------------------------------------------
+
       case 'add_to_waiting_list':
         _addToWaitingList(response);
         break;
 
+    // --------------------------------------------------------
+    // ŞİMDİLİK GEÇ
+    // --------------------------------------------------------
+
       case 'skip':
+        await _statsRepository.incrementSkip();
         debugPrint(
-          "⚪ Şimdilik geç seçildi.",
+          '⚪ Şimdilik geç seçildi.',
         );
         break;
 
+    // --------------------------------------------------------
+    // BİLDİRİMİN KENDİSİNE TIKLANDI
+    // --------------------------------------------------------
+
       default:
+        _handleNotificationTap(response);
+        break;
+    }
+  }
+
+  // ============================================================
+  // BİLDİRİMİN KENDİSİNE TIKLANINCA
+  // ============================================================
+
+  void _handleNotificationTap(
+      NotificationResponse response,
+      ) {
+    try {
+      final payload = response.payload;
+
+      if (payload == null || payload.isEmpty) {
+        router.push('/bilgi');
+        return;
+      }
+
+      final data =
+      jsonDecode(payload) as Map<String, dynamic>;
+
+      final type = data['type']?.toString();
+
+      if (type != 'waiting_list') {
+        return;
+      }
+
+      final user =
+          Supabase.instance.client.auth.currentUser;
+
+      if (user == null) {
         debugPrint(
-          "ℹ️ Bildirime tıklandı.",
+          '⚠️ Kullanıcı giriş yapmamış.',
         );
+
+        router.push('/giris');
+        return;
+      }
+
+      debugPrint(
+        '📋 Bekleme listesine yönlendiriliyor.',
+      );
+
+      router.push('/odak-kontrolu');
+    } catch (e, stackTrace) {
+      debugPrint(
+        '❌ Bildirim yönlendirme hatası: $e',
+      );
+
+      debugPrint(
+        stackTrace.toString(),
+      );
     }
   }
 
@@ -179,20 +243,21 @@ class LocalNotificationService {
       ) async {
     try {
       debugPrint(
-        "🟢 Bekleme listesine ekle seçildi.",
+        '🟢 Bekleme listesine ekle seçildi.',
       );
 
       final payload = response.payload;
 
       if (payload == null || payload.isEmpty) {
         debugPrint(
-          "❌ Notification payload bulunamadı.",
+          '❌ Notification payload bulunamadı.',
         );
         return;
       }
 
       final data =
-      jsonDecode(payload) as Map<String, dynamic>;
+      jsonDecode(payload)
+      as Map<String, dynamic>;
 
       final merchantName =
       data['merchantName']?.toString();
@@ -203,23 +268,23 @@ class LocalNotificationService {
       if (merchantName == null ||
           merchantName.isEmpty) {
         debugPrint(
-          "❌ İşyeri bilgisi bulunamadı.",
+          '❌ İşyeri bilgisi bulunamadı.',
         );
         return;
       }
 
       debugPrint(
-        "🏪 İşyeri: $merchantName",
+        '🏪 İşyeri: $merchantName',
       );
 
       debugPrint(
-        "💰 Tutar: $amount",
+        '💰 Tutar: $amount',
       );
 
-      // Bildirimden gelen fiyatı sayıya çevir.
       double? fiyat;
 
-      if (amount != null && amount.isNotEmpty) {
+      if (amount != null &&
+          amount.isNotEmpty) {
         final temizTutar = amount
             .replaceAll('₺', '')
             .replaceAll('TL', '')
@@ -227,7 +292,9 @@ class LocalNotificationService {
             .replaceAll('.', '')
             .replaceAll(',', '.');
 
-        fiyat = double.tryParse(temizTutar);
+        fiyat = double.tryParse(
+          temizTutar,
+        );
       }
 
       final repository =
@@ -247,16 +314,18 @@ class LocalNotificationService {
       await repository.ogeEkle(
         yeniOge,
       );
-
+      await _statsRepository.incrementWaitingList();
       debugPrint(
-        "✅ Alışveriş bekleme listesine eklendi.",
+        '✅ Alışveriş bekleme listesine eklendi.',
       );
     } catch (e, stackTrace) {
       debugPrint(
-        "❌ Bekleme listesine ekleme hatası: $e",
+        '❌ Bekleme listesine ekleme hatası: $e',
       );
 
-      debugPrint(stackTrace.toString());
+      debugPrint(
+        stackTrace.toString(),
+      );
     }
   }
 }

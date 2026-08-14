@@ -32,7 +32,7 @@ Future<void> main() async {
     publishableKey: SupabaseConfig.supabaseAnonKey,
   );
 
-  final notificationService = NotificationService();
+  final notificationService = NotificationService(router: appRouter,);
 
   await notificationService.initialize();
 

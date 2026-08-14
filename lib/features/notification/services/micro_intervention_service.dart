@@ -1,23 +1,22 @@
 import 'package:bagimlilik/features/notification/enums/dark_pattern_type.dart';
 import 'package:bagimlilik/features/notification/services/local_notification_service.dart';
+import 'package:bagimlilik/features/notification/repositories/daily_behavior_stats_repository.dart';
 
 class MicroInterventionService {
   final LocalNotificationService _notificationService;
+
+  final DailyBehaviorStatsRepository _statsRepository =
+  DailyBehaviorStatsRepository();
 
   MicroInterventionService(this._notificationService);
 
   Future<void> sendIntervention(
       List<DarkPatternType> patterns,
       ) async {
-    // Dark pattern yoksa bildirim gönderme
     if (patterns.isEmpty ||
         patterns.contains(DarkPatternType.none)) {
       return;
     }
-
-    // ============================================================
-    // BİRDEN FAZLA PATTERN
-    // ============================================================
 
     if (patterns.length > 1) {
       await _notificationService.showMicroIntervention(
@@ -28,12 +27,10 @@ class MicroInterventionService {
             "olup olmadığını değerlendirmek ister misin?",
       );
 
+      await _statsRepository.incrementMicroIntervention();
+
       return;
     }
-
-    // ============================================================
-    // TEK PATTERN
-    // ============================================================
 
     switch (patterns.first) {
       case DarkPatternType.scarcity:
@@ -74,7 +71,6 @@ class MicroInterventionService {
         );
         break;
 
-
       case DarkPatternType.confirmShaming:
         await _notificationService.showMicroIntervention(
           title: "Kararını baskı altında verme 💭",
@@ -84,9 +80,11 @@ class MicroInterventionService {
         );
         break;
 
-
       case DarkPatternType.none:
-        break;
+        return;
     }
+
+    await _statsRepository.incrementMicroIntervention();
   }
 }
+//değişti

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 import 'package:notification_listener_service/notification_listener_service.dart';
 
 import 'local_notification_service.dart';
@@ -10,8 +11,17 @@ import 'verification_intervention_service.dart';
 
 class NotificationService {
   StreamSubscription? _subscription;
+  final GoRouter router;
+  late final LocalNotificationService _localNotificationService;
 
-  final LocalNotificationService _localNotificationService = LocalNotificationService();
+  NotificationService({
+    required this.router,
+  }) {
+    _localNotificationService =
+        LocalNotificationService(
+          router: router,
+        );
+  }
 
   late final MicroInterventionService _microInterventionService;
   late final VerificationInterventionService _verificationInterventionService;
