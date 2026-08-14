@@ -1,4 +1,6 @@
+import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_degerlendirme.dart';
 import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BeklemeListesiRepository {
@@ -37,9 +39,10 @@ class BeklemeListesiRepository {
   }
 
   /// Yeni bekleme öğesi ekler.
-  Future<void> ogeEkle(
-      BeklemeOgesi oge,
-      ) async {
+  /// Yeni bekleme öğesi ekler ve veritabanından dönen gerçek öğeyi verir.
+  Future<BeklemeOgesi> ogeEkle(
+    BeklemeOgesi oge,
+  ) async {
     final userId = currentUserId;
 
     if (userId == null) {
@@ -49,20 +52,113 @@ class BeklemeListesiRepository {
     }
 
     final data = oge.toSupabaseMap();
-
-    // Güvenlik açısından user_id'yi
-    // aktif kullanıcıdan alıyoruz.
     data['user_id'] = userId;
+
+    final response = await _supabase
+        .from('bekleme_listesi')
+        .insert(data)
+        .select()
+        .single();
+
+    return BeklemeOgesi.fromSupabase(response);
+  }
+
+  /// Birden fazla öğenin durumunu tek sorguda günceller.
+  Future<void> durumlariGuncelle(
+    List<String> ids,
+    String status,
+  ) async {
+    final userId = currentUserId;
+
+    if (userId == null || ids.isEmpty) {
+      return;
+    }
 
     await _supabase
         .from('bekleme_listesi')
-        .insert(data);
+        .update({'status': status})
+        .eq('user_id', userId)
+        .inFilter('id', ids);
+  }
+
+  /// Öğenin durumunu ve kullanıcının nihai kararını günceller.
+  Future<void> kararGuncelle({
+    required String id,
+    required String status,
+    String? decision,
+    DateTime? yeniEklenmeTarihi,
+  }) async {
+    final userId = currentUserId;
+
+    if (userId == null) {
+      return;
+    }
+
+    final updateData = <String, dynamic>{
+      'status': status,
+      'decision': decision,
+    };
+
+    if (yeniEklenmeTarihi != null) {
+      updateData['created_at'] = yeniEklenmeTarihi.toUtc().toIso8601String();
+    }
+
+    try {
+      final response = await _supabase
+          .from('bekleme_listesi')
+          .update(updateData)
+          .eq('id', id)
+          .eq('user_id', userId)
+          .select();
+
+      if ((response as List).isEmpty) {
+        final numId = int.tryParse(id);
+        if (numId != null) {
+          await _supabase
+              .from('bekleme_listesi')
+              .update(updateData)
+              .eq('id', numId)
+              .eq('user_id', userId)
+              .select();
+        }
+      }
+    } catch (_) {
+      final numId = int.tryParse(id);
+      if (numId != null) {
+        try {
+          await _supabase
+              .from('bekleme_listesi')
+              .update(updateData)
+              .eq('id', numId)
+              .eq('user_id', userId)
+              .select();
+        } catch (_) {}
+      }
+    }
+  }
+
+  /// Bekleme değerlendirme kaydı ekler (bekleme_degerlendirmeleri tablosu).
+  Future<void> degerlendirmeEkle(BeklemeDegerlendirme degerlendirme) async {
+    final userId = currentUserId;
+    if (userId == null) return;
+
+    final data = degerlendirme.toSupabaseMap();
+    data['user_id'] = userId;
+
+    try {
+      await _supabase.from('bekleme_degerlendirmeleri').upsert(
+            data,
+            onConflict: 'waitlist_id, evaluation_type',
+          );
+    } catch (e) {
+      debugPrint('❌ Degerlendirme ekleme hatası: $e');
+    }
   }
 
   /// Bekleme listesinden tek öğe siler.
   Future<void> ogeSil(
-      String id,
-      ) async {
+    String id,
+  ) async {
     final userId = currentUserId;
 
     if (userId == null) {
@@ -78,8 +174,8 @@ class BeklemeListesiRepository {
 
   /// Birden fazla öğeyi tek sorguda siler.
   Future<void> ogeleriSil(
-      List<String> ids,
-      ) async {
+    List<String> ids,
+  ) async {
     final userId = currentUserId;
 
     if (userId == null || ids.isEmpty) {

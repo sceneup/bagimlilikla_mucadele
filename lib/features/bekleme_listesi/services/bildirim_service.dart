@@ -1,3 +1,5 @@
+import 'package:bagimlilik/core/routers/app_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -22,19 +24,31 @@ class BildirimService {
     const androidAyarlari = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
     );
-    const iosAyarlari = DarwinInitializationSettings();
+    const iosAyarlari = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
     const ayarlar = InitializationSettings(
       android: androidAyarlari,
       iOS: iosAyarlari,
     );
 
-    await _plugin.initialize(ayarlar);
+    await _plugin.initialize(
+      ayarlar,
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
+        debugPrint("🔔 Bildirime tıklandı: ${response.payload}");
+        appRouter.push('/yeniden-degerlendirme');
+      },
+    );
 
-    await _plugin
+    final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+        >();
+
+    await androidPlugin?.requestNotificationsPermission();
+    await androidPlugin?.requestExactAlarmsPermission();
 
     _hazir = true;
   }
@@ -51,20 +65,58 @@ class BildirimService {
       'Bekleme Listesi Hatırlatmaları',
       channelDescription:
           'Bekleme listesindeki ürünler için 24 saatlik mola tamamlandığında bildirim',
-      importance: Importance.high,
+      importance: Importance.max,
       priority: Priority.high,
+      showWhen: true,
+      enableVibration: true,
+      playSound: true,
     );
-    const bildirimDetaylari = NotificationDetails(android: androidDetaylari);
+    const iosDetaylari = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    const bildirimDetaylari = NotificationDetails(
+      android: androidDetaylari,
+      iOS: iosDetaylari,
+    );
+
+    final utcTetik = tetikTarihi.toUtc();
+    final tzZaman = tz.TZDateTime.from(utcTetik, tz.UTC);
+
+    debugPrint('🔔 Bildirim planlandı: ID=$id, UTC Zamanı=$utcTetik');
 
     await _plugin.zonedSchedule(
       id,
-      'Tebrikler!',
-      '$kategoriIsim için verdiğin 24 saatlik molayı tamamladın. Bir rozet kazandın.',
-      tz.TZDateTime.from(tetikTarihi, tz.local),
+      '🌿 24 saatin doldu',
+      '$kategoriIsim — Dün almak istediğin ürün hâlâ aklında mı? Şimdi kararını yeniden değerlendirebilirsin.',
+      tzZaman,
       bildirimDetaylari,
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
+      payload: 'yeniden_degerlendirme',
+    );
+  }
+
+  Future<void> anlikTestBildirimiGoster() async {
+    await baslat();
+    const androidDetaylari = AndroidNotificationDetails(
+      'bekleme_listesi_kanali',
+      'Bekleme Listesi Hatırlatmaları',
+      channelDescription:
+          'Bekleme listesindeki ürünler için 24 saatlik mola tamamlandığında bildirim',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+    );
+    const bildirimDetaylari = NotificationDetails(android: androidDetaylari);
+    await _plugin.show(
+      99999,
+      '🌿 Test Bildirimi',
+      'Bildirimler cihazında başarıyla çalışıyor! Süre dolduğunda bu ekran açılacak.',
+      bildirimDetaylari,
+      payload: 'yeniden_degerlendirme',
     );
   }
 

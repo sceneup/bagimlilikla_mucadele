@@ -6,6 +6,7 @@ import 'package:bagimlilik/features/odak_kontrolu/models/kategori.dart';
 import 'package:bagimlilik/features/odak_kontrolu/services/kategori_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 class BeklemeListesiView extends ConsumerWidget {
   const BeklemeListesiView({super.key});
@@ -100,6 +101,16 @@ class BeklemeListesiView extends ConsumerWidget {
                 child: BeklemeListKart(
                   oge: oge,
                   kategori: kategori,
+                  onTap: () {
+                    if (oge.suresiDoldu || oge.status == 'ready_for_evaluation') {
+                      context.push('/yeniden-degerlendirme', extra: oge);
+                    }
+                  },
+                  onKararSecildi: (decision) {
+                    ref
+                        .read(beklemeListesiViewModelProvider.notifier)
+                        .kararVer(oge.id, decision);
+                  },
                 ),
               );
             },

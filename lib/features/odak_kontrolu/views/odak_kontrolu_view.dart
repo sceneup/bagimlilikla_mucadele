@@ -2,6 +2,7 @@ import 'package:bagimlilik/core/colors/app_colors.dart';
 import 'package:bagimlilik/core/widgets/custom_app_bar.dart';
 import 'package:bagimlilik/features/odak_kontrolu/models/odak_kontrolu_state.dart';
 import 'package:bagimlilik/features/odak_kontrolu/viewmodels/odak_kontrolu_view_model.dart';
+import 'package:bagimlilik/features/odak_kontrolu/widgets/fiyat_adimi.dart';
 import 'package:bagimlilik/features/odak_kontrolu/widgets/kategori_adimi.dart';
 import 'package:bagimlilik/features/odak_kontrolu/widgets/sonuc_adimi.dart';
 import 'package:bagimlilik/features/odak_kontrolu/widgets/tetikleyici_adimi.dart';
@@ -46,6 +47,7 @@ class _OdakKontroluViewState extends ConsumerState<OdakKontroluView> {
         child: switch (state.adim) {
           OdakAdimi.kategori => const KategoriAdimi(),
           OdakAdimi.tetikleyici => const TetikleyiciAdimi(),
+          OdakAdimi.fiyat => const FiyatAdimi(),
           OdakAdimi.sonuc => SonucAdimi(state: state),
         },
       ),
@@ -56,6 +58,7 @@ class _OdakKontroluViewState extends ConsumerState<OdakKontroluView> {
     return switch (adim) {
       OdakAdimi.kategori => 'Ne almak istiyorsun?',
       OdakAdimi.tetikleyici => 'Seni ne tetikledi?',
+      OdakAdimi.fiyat => 'Bir Nefes Al',
       OdakAdimi.sonuc => 'Bir Nefes Al',
     };
   }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:bagimlilik/core/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
 import 'package:bagimlilik/features/notification/services/notification_service.dart';
 import 'package:flutter/foundation.dart';
 
@@ -35,6 +36,7 @@ Future<void> main() async {
   final notificationService = NotificationService(router: appRouter,);
 
   await notificationService.initialize();
+  await BildirimService().baslat();
 
   if (!kIsWeb) {
     notificationService.startListening();
