@@ -18,6 +18,10 @@ class GirisBaslik extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.secondaryContainer,
             borderRadius: BorderRadius.circular(20),
+            image: const DecorationImage(
+              image: AssetImage('assets/images/img.png'),
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const Text(

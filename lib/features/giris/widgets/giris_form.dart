@@ -42,7 +42,7 @@ class GirisForm extends ConsumerWidget {
               label: "Şifre",
               child: CustomTextField(
                 controller: vm.passwordController,
-                hintText: "Şifre oluşturun",
+                hintText: "Şifre giriniz",
                 prefixIcon: Icons.lock_outline,
                 keyboardType: TextInputType.visiblePassword,
                 obscureText: true,

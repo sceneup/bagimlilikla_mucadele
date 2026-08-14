@@ -80,8 +80,8 @@ class _CustomTextFieldState extends State<CustomTextField> {
         },
         icon: Icon(
           _obscureText
-              ? Icons.visibility_outlined
-              : Icons.visibility_off_outlined,
+              ? Icons.visibility_off_outlined
+              : Icons.visibility_outlined,
           color: AppColors.textSecondary,
         ),
       )
