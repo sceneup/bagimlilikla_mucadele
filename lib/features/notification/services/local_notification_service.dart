@@ -309,6 +309,7 @@ class LocalNotificationService {
         tetikleyiciId: merchantName,
         eklenmeTarihi: DateTime.now(),
         fiyat: fiyat,
+        sourceType: 'notification',
       );
 
       await repository.ogeEkle(

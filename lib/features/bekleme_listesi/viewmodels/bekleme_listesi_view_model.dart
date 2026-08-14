@@ -1,3 +1,4 @@
+import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_degerlendirme.dart';
 import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
 import 'package:bagimlilik/features/bekleme_listesi/repositories/bekleme_listesi_repository.dart';
 import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
@@ -20,20 +21,33 @@ class BeklemeListesiViewModel
     final liste = await _repository.listeyiGetir();
 
     final aktifler = <BeklemeOgesi>[];
-    final silinecekIdler = <String>[];
+    final guncellenecekIdler = <String>[];
 
     for (final oge in liste) {
-      if (oge.suresiDoldu) {
-        silinecekIdler.add(oge.id);
+      // Sadece iptal/tamamlanmamış ve karara bağlanmamış aktif öğeleri filtrele
+      if (oge.status == 'cancelled' ||
+          oge.status == 'completed' ||
+          oge.decision == 'abandoned' ||
+          oge.decision == 'purchased') {
+        continue;
+      }
+
+      // Süresi dolmuş ve hala 'waiting' durumunda olan öğeleri 'ready_for_evaluation' yap
+      if (oge.suresiDoldu && oge.status == 'waiting') {
+        guncellenecekIdler.add(oge.id);
+        aktifler.add(
+          oge.copyWith(status: 'ready_for_evaluation'),
+        );
       } else {
         aktifler.add(oge);
       }
     }
 
-    // Süresi dolmuş kayıtları tek seferde sil.
-    if (silinecekIdler.isNotEmpty) {
-      await _repository.ogeleriSil(
-        silinecekIdler,
+    // Süresi dolan 'waiting' öğelerinin durumunu Supabase'de güncelle
+    if (guncellenecekIdler.isNotEmpty) {
+      await _repository.durumlariGuncelle(
+        guncellenecekIdler,
+        'ready_for_evaluation',
       );
     }
 
@@ -41,10 +55,13 @@ class BeklemeListesiViewModel
   }
 
   Future<void> ekle(
-      String kategoriId, {
-        String? tetikleyiciId,
-        double? fiyat,
-      }) async {
+    String kategoriId, {
+    String? tetikleyiciId,
+    double? fiyat,
+    String sourceType = 'manuel',
+    int? initialUrgeScore,
+    String? initialPurchaseReason,
+  }) async {
     final mevcut = await future;
 
     final userId = _repository.currentUserId;
@@ -58,30 +75,33 @@ class BeklemeListesiViewModel
       tetikleyiciId: tetikleyiciId,
       eklenmeTarihi: DateTime.now(),
       fiyat: fiyat,
+      sourceType: sourceType,
+      status: 'waiting',
     );
 
-    // Önce UI'ı güncelle.
+    // Veritabanına kaydet ve Supabase'deki gerçek ID'ye sahip öğeyi al
+    final eklenenOge = await _repository.ogeEkle(
+      yeniOge,
+    );
+
+    if (userId != null) {
+      final initialDegerlendirme = BeklemeDegerlendirme(
+        waitlistId: eklenenOge.id,
+        userId: userId,
+        evaluationType: 'initial',
+        urgeScore: initialUrgeScore ?? 5,
+        purchaseReason: initialPurchaseReason,
+      );
+      await _repository.degerlendirmeEkle(initialDegerlendirme);
+    }
+
     final guncelListe = [
       ...mevcut,
-      yeniOge,
+      eklenenOge,
     ];
 
     state = AsyncData(guncelListe);
 
-    // Veritabanına kaydet.
-    await _repository.ogeEkle(
-      yeniOge,
-    );
-
-    // Hatırlatıcı için kategori adını bul.
-    //
-    // Örneğin:
-    // giyim       → Giyim
-    // elektronik → Elektronik
-    // TRENDYOL    → TRENDYOL
-    //
-    // Trendyol sabit kategori listesinde yoksa
-    // firstWhere hata vermesin.
     final kategoriler =
     _kategoriService.kategorileriGetir();
 
@@ -100,11 +120,77 @@ class BeklemeListesiViewModel
       ),
       kategoriIsim: kategoriIsim,
       tetikTarihi: yeniOge.eklenmeTarihi.add(
-        const Duration(
-          hours: BeklemeOgesi.bekleSuresiSaat,
+        Duration(
+          minutes: BeklemeOgesi.bekleSuresiDakika,
         ),
       ),
     );
+  }
+
+  /// Kullanıcının nihai kararını kaydeder (abandoned, purchased, wait_more)
+  Future<void> kararVer(String id, String decision) async {
+    final mevcut = await future;
+
+    final ogeIndex = mevcut.indexWhere((o) => o.id == id);
+    if (ogeIndex == -1) return;
+
+    final oge = mevcut[ogeIndex];
+
+    if (decision == 'wait_more') {
+      // 24 saat (test modunda 2 dk) daha bekle: eklenme tarihini yenile ve durumu 'waiting' yap
+      final simdi = DateTime.now();
+      final guncelOge = oge.copyWith(
+        eklenmeTarihi: simdi,
+        status: 'waiting',
+        decision: 'wait_more',
+      );
+
+      final guncelListe = List<BeklemeOgesi>.from(mevcut);
+      guncelListe[ogeIndex] = guncelOge;
+      state = AsyncData(guncelListe);
+
+      await _repository.kararGuncelle(
+        id: id,
+        status: 'waiting',
+        decision: 'wait_more',
+        yeniEklenmeTarihi: simdi,
+      );
+
+      // Hatırlatıcıyı yeniden kur
+      final kategoriler = _kategoriService.kategorileriGetir();
+      String kategoriIsim = oge.kategoriId;
+      for (final k in kategoriler) {
+        if (k.id == oge.kategoriId) {
+          kategoriIsim = k.isim;
+          break;
+        }
+      }
+
+      await _bildirimService.hatirlaticiKur(
+        id: _bildirimIdUret(id),
+        kategoriIsim: kategoriIsim,
+        tetikTarihi: simdi.add(
+          Duration(minutes: BeklemeOgesi.bekleSuresiDakika),
+        ),
+      );
+    } else {
+      // 'abandoned' veya 'purchased': durumu 'completed' yap ve aktif listeden kaldır
+      final guncelListe = mevcut.where((o) => o.id != id).toList();
+      state = AsyncData(guncelListe);
+
+      await _repository.kararGuncelle(
+        id: id,
+        status: 'completed',
+        decision: decision,
+      );
+
+      await _bildirimService.hatirlaticiIptalEt(_bildirimIdUret(id));
+    }
+  }
+
+  /// Bekleme değerlendirmesi ekler (bekleme_degerlendirmeleri)
+  Future<void> degerlendirmeKaydet(BeklemeDegerlendirme degerlendirme) async {
+    await _repository.degerlendirmeEkle(degerlendirme);
   }
 
   Future<void> kaldir(String id) async {
@@ -119,8 +205,11 @@ class BeklemeListesiViewModel
     // Önce UI'ı güncelle.
     state = AsyncData(guncelListe);
 
-    // Supabase'den sil.
-    await _repository.ogeSil(id);
+    // Supabase'de durumu 'cancelled' olarak güncelle.
+    await _repository.kararGuncelle(
+      id: id,
+      status: 'cancelled',
+    );
 
     // Hatırlatıcıyı iptal et.
     await _bildirimService.hatirlaticiIptalEt(
