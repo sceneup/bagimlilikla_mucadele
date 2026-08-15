@@ -3,11 +3,16 @@ import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
 import 'package:bagimlilik/features/bekleme_listesi/repositories/bekleme_listesi_repository.dart';
 import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
 import 'package:bagimlilik/features/odak_kontrolu/services/kategori_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 int _bildirimIdUret(String ogeId) {
-  return int.tryParse(ogeId) ??
-      (ogeId.hashCode & 0x7FFFFFFF);
+  final parsed = int.tryParse(ogeId);
+  if (parsed != null) {
+    // millisecondsSinceEpoch 32-bit sınırını aşıyor → maskele
+    return parsed & 0x7FFFFFFF;
+  }
+  return ogeId.hashCode & 0x7FFFFFFF;
 }
 
 class BeklemeListesiViewModel
@@ -62,69 +67,71 @@ class BeklemeListesiViewModel
     int? initialUrgeScore,
     String? initialPurchaseReason,
   }) async {
-    final mevcut = await future;
+    debugPrint('🟢 [ekle] başladı: kategoriId=$kategoriId');
+    try {
+      final mevcut = await future;
+      debugPrint('🟢 [ekle] mevcut liste alındı: ${mevcut.length} öğe');
 
-    final userId = _repository.currentUserId;
+      final userId = _repository.currentUserId;
+      debugPrint('🟢 [ekle] userId=$userId');
 
-    final yeniOge = BeklemeOgesi(
-      id: DateTime.now()
-          .millisecondsSinceEpoch
-          .toString(),
-      userId: userId,
-      kategoriId: kategoriId,
-      tetikleyiciId: tetikleyiciId,
-      eklenmeTarihi: DateTime.now(),
-      fiyat: fiyat,
-      sourceType: sourceType,
-      status: 'waiting',
-    );
-
-    // Veritabanına kaydet ve Supabase'deki gerçek ID'ye sahip öğeyi al
-    final eklenenOge = await _repository.ogeEkle(
-      yeniOge,
-    );
-
-    if (userId != null) {
-      final initialDegerlendirme = BeklemeDegerlendirme(
-        waitlistId: eklenenOge.id,
+      final yeniOge = BeklemeOgesi(
+        id: DateTime.now()
+            .millisecondsSinceEpoch
+            .toString(),
         userId: userId,
-        evaluationType: 'initial',
-        urgeScore: initialUrgeScore ?? 5,
-        purchaseReason: initialPurchaseReason,
+        kategoriId: kategoriId,
+        tetikleyiciId: tetikleyiciId,
+        eklenmeTarihi: DateTime.now(),
+        fiyat: fiyat,
+        sourceType: sourceType,
+        status: 'waiting',
       );
-      await _repository.degerlendirmeEkle(initialDegerlendirme);
-    }
 
-    final guncelListe = [
-      ...mevcut,
-      eklenenOge,
-    ];
+      // Veritabanına kaydet ve Supabase'deki gerçek ID'ye sahip öğeyi al
+      debugPrint('🟢 [ekle] Supabase\'e ekleniyor...');
+      final eklenenOge = await _repository.ogeEkle(yeniOge);
+      debugPrint('🟢 [ekle] Supabase\'e eklendi, ID=${eklenenOge.id}');
 
-    state = AsyncData(guncelListe);
-
-    final kategoriler =
-    _kategoriService.kategorileriGetir();
-
-    String kategoriIsim = kategoriId;
-
-    for (final kategori in kategoriler) {
-      if (kategori.id == kategoriId) {
-        kategoriIsim = kategori.isim;
-        break;
+      if (userId != null) {
+        final initialDegerlendirme = BeklemeDegerlendirme(
+          waitlistId: eklenenOge.id,
+          userId: userId,
+          evaluationType: 'initial',
+          urgeScore: initialUrgeScore ?? 5,
+          purchaseReason: initialPurchaseReason,
+        );
+        await _repository.degerlendirmeEkle(initialDegerlendirme);
+        debugPrint('🟢 [ekle] initial degerlendirme eklendi');
       }
-    }
 
-    await _bildirimService.hatirlaticiKur(
-      id: _bildirimIdUret(
-        yeniOge.id,
-      ),
-      kategoriIsim: kategoriIsim,
-      tetikTarihi: yeniOge.eklenmeTarihi.add(
-        Duration(
-          minutes: BeklemeOgesi.bekleSuresiDakika,
-        ),
-      ),
-    );
+      final guncelListe = [...mevcut, eklenenOge];
+      state = AsyncData(guncelListe);
+
+      final kategoriler = _kategoriService.kategorileriGetir();
+      String kategoriIsim = kategoriId;
+      for (final kategori in kategoriler) {
+        if (kategori.id == kategoriId) {
+          kategoriIsim = kategori.isim;
+          break;
+        }
+      }
+
+      final tetikTarihi = yeniOge.eklenmeTarihi.add(
+        Duration(minutes: BeklemeOgesi.bekleSuresiDakika),
+      );
+      debugPrint('🟢 [ekle] hatirlaticiKur çağrılıyor... tetikTarihi=$tetikTarihi (${BeklemeOgesi.bekleSuresiDakika} dk sonra)');
+
+      await _bildirimService.hatirlaticiKur(
+        id: _bildirimIdUret(yeniOge.id),
+        kategoriIsim: kategoriIsim,
+        tetikTarihi: tetikTarihi,
+      );
+      debugPrint('🟢 [ekle] hatirlaticiKur tamamlandı');
+    } catch (e, stack) {
+      debugPrint('❌ [ekle] HATA: $e');
+      debugPrint('❌ [ekle] StackTrace: $stack');
+    }
   }
 
   /// Kullanıcının nihai kararını kaydeder (abandoned, purchased, wait_more)

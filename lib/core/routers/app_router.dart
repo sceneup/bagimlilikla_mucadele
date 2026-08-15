@@ -13,9 +13,40 @@ import 'package:bagimlilik/features/odak_kontrolu/views/odak_kontrolu_view.dart'
 import 'package:bagimlilik/features/profil/views/hakkinda_view.dart';
 import 'package:bagimlilik/features/profil/views/profil_view.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+String _getInitialLocation() {
+  try {
+    final session = Supabase.instance.client.auth.currentSession;
+    if (session != null) {
+      return '/anasayfa';
+    }
+  } catch (_) {}
+  return '/giris';
+}
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: '/giris',
+  initialLocation: _getInitialLocation(),
+  redirect: (context, state) {
+    try {
+      final session = Supabase.instance.client.auth.currentSession;
+      final isAuthRoute = state.matchedLocation == '/giris' ||
+          state.matchedLocation == '/register' ||
+          state.matchedLocation == '/register-detay' ||
+          state.matchedLocation == '/anket';
+
+      // Zaten giriş yapmış kullanıcı /giris sayfasına gitmeye çalışırsa anasayfaya yönlendir
+      if (session != null && state.matchedLocation == '/giris') {
+        return '/anasayfa';
+      }
+
+      // Giriş yapmamış kullanıcı korumalı sayfaya erişmeye çalışırsa giriş ekranına yönlendir
+      if (session == null && !isAuthRoute) {
+        return '/giris';
+      }
+    } catch (_) {}
+    return null;
+  },
   routes: [
     GoRoute(
       path: '/giris',
