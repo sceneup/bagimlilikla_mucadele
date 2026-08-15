@@ -59,6 +59,11 @@ class KayitViewModel extends Notifier<KayitState> {
       selectedAvatar: avatarPath,
     );
   }
+  void setOnamlarTamam(bool value) {
+    state = state.copyWith(
+      onamlarTamam: value,
+    );
+  }
 
   String get email => emailController.text.trim();
 

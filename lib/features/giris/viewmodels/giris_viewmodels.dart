@@ -1,6 +1,7 @@
 import 'package:bagimlilik/features/auth/providers/auth_provider.dart';
 import 'package:bagimlilik/features/auth/services/auth_service.dart';
 import 'package:bagimlilik/features/giris/viewmodels/giris_state.dart';
+import 'package:bagimlilik/features/notification/repositories/daily_behavior_stats_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,8 @@ class GirisViewModel extends Notifier<GirisState> {
   late final AuthService _authService;
   final SurveyRepository _surveyRepository =
   SurveyRepository();
+  final DailyBehaviorStatsRepository _notificationRepository =
+  DailyBehaviorStatsRepository();
   final formKey = GlobalKey<FormState>();
 
   final usernameController = TextEditingController();
@@ -73,13 +76,30 @@ class GirisViewModel extends Notifier<GirisState> {
       // ANKET KONTROLÜ
       // --------------------------------------------------
 
+      // --------------------------------------------------
+// ANKET KONTROLÜ
+// --------------------------------------------------
+
       final anketGerekli =
       await _surveyRepository.isSurveyDue();
 
+      if (anketGerekli) {
+        EasyLoading.dismiss();
+        return '/anket';
+      }
+
+// --------------------------------------------------
+// BİLDİRİM ERİŞİMİ KONTROLÜ
+// --------------------------------------------------
+
+      final bildirimTamamlandi =
+      await _notificationRepository
+          .isNotificationAccessConfirmed();
+
       EasyLoading.dismiss();
 
-      if (anketGerekli) {
-        return '/anket';
+      if (!bildirimTamamlandi) {
+        return '/erisim-bildirim';
       }
 
       return '/anasayfa';

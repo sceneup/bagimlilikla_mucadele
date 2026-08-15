@@ -34,4 +34,41 @@ class DailyBehaviorStatsRepository {
       },
     );
   }
+  Future<void> setNotificationAccessConfirmed(
+      bool value,
+      ) async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) {
+      throw Exception(
+        'Kullanıcı giriş yapmamış.',
+      );
+    }
+
+    await _supabase
+        .from('profiles')
+        .update({
+      'notification_access_confirmed': value,
+    })
+        .eq('id', user.id);
+  }
+  Future<bool> isNotificationAccessConfirmed() async {
+    final user = _supabase.auth.currentUser;
+
+    if (user == null) {
+      return false;
+    }
+
+    final response = await _supabase
+        .from('profiles')
+        .select('notification_access_confirmed')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (response == null) {
+      return false;
+    }
+
+    return response['notification_access_confirmed'] == true;
+  }
 }

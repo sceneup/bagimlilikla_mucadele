@@ -15,6 +15,7 @@ abstract final class AppColors {
   /// Vurgu rengi (Grafikler, AI kartları, özel butonlar)
   static const Color accent = Color(0xFF35858E);
 
+  static const Color green = Color(0xff7EC151);
   static const Color blue = Color(0xFF99C2FF);
 
   static const Color purple2 = Color(0xFFC47BE4);

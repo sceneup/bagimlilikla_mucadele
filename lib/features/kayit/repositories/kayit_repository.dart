@@ -31,7 +31,7 @@ class KayitRepository {
     if (user == null) {
       throw Exception("Kullanıcı oluşturulamadı.");
     }
-
+    final consentDate = DateTime.now();
     // 2. Profil kaydı
     await _supabase.from('profiles').insert({
       'id': user.id,
@@ -44,7 +44,12 @@ class KayitRepository {
       'living_status': livingStatus,
       'education_level': educationLevel,
       'employment_status': employmentStatus,
-      'email' : email
+      'email' : email,
+      'kvkk_version': '1.0',
+      'kvkk_accepted_at': consentDate.toIso8601String(),
+
+      'consent_version': '1.0',
+      'consent_accepted_at': consentDate.toIso8601String(),
     });
   }
 }

@@ -156,7 +156,7 @@ class AnketViews extends ConsumerWidget {
                               if (!context.mounted) return;
 
                               // Login ekranına yönlendir
-                              context.go('/giris');
+                              context.go('/erisim-bildirim');
 
                             }catch (e) {
                               EasyLoading.dismiss();

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,7 @@ import 'local_notification_service.dart';
 import 'micro_intervention_service.dart';
 import 'notification_filter_service.dart';
 import 'verification_intervention_service.dart';
+import 'package:android_intent_plus/android_intent.dart';
 
 class NotificationService {
   StreamSubscription? _subscription;
@@ -40,6 +42,10 @@ class NotificationService {
   static const Duration _shoppingDuplicateWindow = Duration(seconds: 30);
 
   Future<void> initialize() async {
+    if (_isInitialized) {
+      return;
+    }
+
     await _localNotificationService.initialize();
 
     _microInterventionService =
@@ -64,8 +70,25 @@ class NotificationService {
     return await NotificationListenerService
         .isPermissionGranted();
   }
+  Future<void> openNotificationSettings() async {
+    if (!Platform.isAndroid) {
+      return;
+    }
 
-  void startListening() {
+    const packageName = 'com.example.bagimlilik';
+
+    final intent = AndroidIntent(
+      action: 'android.settings.NOTIFICATION_LISTENER_DETAIL_SETTINGS',
+      arguments: {
+        'android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME':
+        '$packageName/notification.listener.service.NotificationListener',
+      },
+    );
+
+    await intent.launch();
+  }
+
+  Future<void> startListening() async {
     if (!_isInitialized) {
       return;
     }
@@ -73,11 +96,13 @@ class NotificationService {
     if (_isListening) {
       return;
     }
+
     _isListening = true;
+
     final filter = NotificationFilterService();
+
     _subscription =
-        NotificationListenerService.notificationsStream
-            .listen(
+        NotificationListenerService.notificationsStream.listen(
               (event) async {
             try {
               final analysis = filter.analyze(
@@ -90,6 +115,10 @@ class NotificationService {
                 return;
               }
 
+              // ============================================================
+              // ALIŞVERİŞ DOĞRULAMA
+              // ============================================================
+
               if (analysis.isShoppingVerification) {
                 print(
                   "Merchant: ${analysis.merchantName}",
@@ -100,21 +129,17 @@ class NotificationService {
                 );
 
                 final shoppingKey =
-                _createShoppingNotificationKey(
-                  analysis,
-                );
+                _createShoppingNotificationKey(analysis);
 
                 print(
                   "Shopping Key: $shoppingKey",
                 );
 
-                if (_processingShoppingKeys
-                    .contains(shoppingKey)) {
-
+                // Aynı işlem şu anda işleniyorsa tekrar işleme
+                if (_processingShoppingKeys.contains(shoppingKey)) {
                   print(
-                    "   Key: $shoppingKey",
+                    "⚠️ Alışveriş bildirimi zaten işleniyor: $shoppingKey",
                   );
-
                   return;
                 }
 
@@ -123,6 +148,7 @@ class NotificationService {
                 final lastShoppingTime =
                 _recentShoppingKeys[shoppingKey];
 
+                // 30 saniye içinde aynı bildirim geldiyse tekrar işleme
                 if (lastShoppingTime != null &&
                     now
                         .difference(lastShoppingTime)
@@ -130,18 +156,14 @@ class NotificationService {
                       _shoppingDuplicateWindow,
                     ) <
                         0) {
-
                   print(
-                    "   Key: $shoppingKey",
+                    "⚠️ Aynı alışveriş bildirimi tekrar geldi: "
+                        "$shoppingKey",
                   );
-
                   return;
                 }
 
-                _processingShoppingKeys.add(
-                  shoppingKey,
-                );
-
+                _processingShoppingKeys.add(shoppingKey);
                 _recentShoppingKeys[shoppingKey] = now;
 
                 try {
@@ -157,8 +179,13 @@ class NotificationService {
                     shoppingKey,
                   );
                 }
+
                 return;
               }
+
+              // ============================================================
+              // NORMAL BİLDİRİM DUPLICATE KONTROLÜ
+              // ============================================================
 
               final notificationKey =
                   "${analysis.packageName}|"
@@ -184,10 +211,12 @@ class NotificationService {
                 return;
               }
 
-              _lastNotificationKey =
-                  notificationKey;
-
+              _lastNotificationKey = notificationKey;
               _lastNotificationTime = now;
+
+              // ============================================================
+              // DEBUG
+              // ============================================================
 
               print(
                 "========== NOTIFICATION ==========",
@@ -228,12 +257,20 @@ class NotificationService {
               print(
                 "==================================",
               );
+
+              // ============================================================
+              // DARK PATTERN YOKSA MÜDAHALE YOK
+              // ============================================================
+
               if (!analysis.hasDarkPattern) {
                 return;
               }
 
-              await _microInterventionService
-                  .sendIntervention(
+              // ============================================================
+              // MİKRO MÜDAHALE
+              // ============================================================
+
+              await _microInterventionService.sendIntervention(
                 analysis.detectedPatterns,
               );
             } catch (e, stackTrace) {
@@ -241,7 +278,9 @@ class NotificationService {
                 "❌ NotificationService hata: $e",
               );
 
-              debugPrint(stackTrace.toString());
+              debugPrint(
+                stackTrace.toString(),
+              );
             }
           },
           onError: (error) {
@@ -284,8 +323,8 @@ class NotificationService {
         "$verificationCode";
   }
 
-  void stopListening() {
-    _subscription?.cancel();
+  Future<void> stopListening() async {
+    await _subscription?.cancel();
     _subscription = null;
     _isListening = false;
   }

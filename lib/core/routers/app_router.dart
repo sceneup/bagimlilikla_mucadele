@@ -5,6 +5,7 @@ import 'package:bagimlilik/features/anket/views/anket_views.dart';
 import 'package:bagimlilik/features/bekleme_listesi/models/bekleme_ogesi.dart';
 import 'package:bagimlilik/features/bekleme_listesi/views/bekleme_listesi_view.dart';
 import 'package:bagimlilik/features/bekleme_listesi/views/yeniden_degerlendirme_view.dart';
+import 'package:bagimlilik/features/bilgi/views/bilgi_view.dart';
 import 'package:bagimlilik/features/giris/views/giris_views.dart';
 import 'package:bagimlilik/features/kayit/views/kayit_detay_views.dart';
 import 'package:bagimlilik/features/kayit/views/kayit_views.dart';
@@ -89,6 +90,12 @@ final GoRouter appRouter = GoRouter(
         return YenidenDegerlendirmeView(oge: oge);
       },
     ),
+    GoRoute(
+      path: '/erisim-bildirim',
+      builder: (context, state) {
+        return const NotificationView();
+      },
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainShell(
@@ -111,7 +118,7 @@ final GoRouter appRouter = GoRouter(
             GoRoute(
               path: '/bilgi',
               builder: (context, state) {
-                return const NotificationView();
+                return const BilgiView();
               },
             ),
           ],

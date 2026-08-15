@@ -5,44 +5,78 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 class KayitOlButton extends ConsumerWidget {
   const KayitOlButton({super.key});
 
   @override
-  Widget build(BuildContext context,WidgetRef ref) {
-    final vm = ref.read(kayitViewModelProvider.notifier);
+  Widget build(
+      BuildContext context,
+      WidgetRef ref,
+      ) {
+    final kayitState = ref.watch(
+      kayitViewModelProvider,
+    );
+
+    final vm = ref.read(
+      kayitViewModelProvider.notifier,
+    );
+
     return Column(
       spacing: 10,
       children: [
         CustomButton(
-            text: "KAYIT OL",
-            backgroundColor: AppColors.accent,
-            fontSize: 20,
-            height: 50,
-            onPressed: ()async{
-              if (!vm.detailFormKey.currentState!.validate()) {
-                EasyLoading.showInfo(
-                  "Lütfen hatalı alanları kontrol ediniz.",
-                );
-                return;
-              }
+          text: "KAYIT OL",
+          backgroundColor: AppColors.accent,
+          fontSize: 20,
+          height: 50,
+          onPressed: () async {
+            // KVKK + Açık Rıza kontrolü
+            if (!kayitState.onamlarTamam) {
+              EasyLoading.showError(
+                "Lütfen KVKK ve Açık Rıza metinlerini onaylayınız.",
+              );
+              return;
+            }
 
-              final success = await vm.register();
-              if (success) {
-                EasyLoading.showSuccess("Kayıt başarılı");
+            // Form kontrolü
+            if (!vm.detailFormKey.currentState!.validate()) {
+              EasyLoading.showInfo(
+                "Lütfen hatalı alanları kontrol ediniz.",
+              );
+              return;
+            }
 
-                await Future.delayed(const Duration(seconds: 2));
+            final success = await vm.register();
 
-                if (context.mounted) {
-                  context.go("/anket");
-                }
+            if (success) {
+              EasyLoading.showSuccess(
+                "Kayıt başarılı",
+              );
+
+              await Future.delayed(
+                const Duration(seconds: 2),
+              );
+
+              if (context.mounted) {
+                context.go("/anket");
               }
             }
+          },
         ),
-        TextButton(onPressed: (){
-          context.go("/register");
-        },
-            child: Text("Geri",style: const TextStyle(color: AppColors.accent,fontSize: 20),))
+
+        TextButton(
+          onPressed: () {
+            context.go("/register");
+          },
+          child: const Text(
+            "Geri",
+            style: TextStyle(
+              color: AppColors.accent,
+              fontSize: 20,
+            ),
+          ),
+        ),
       ],
     );
   }

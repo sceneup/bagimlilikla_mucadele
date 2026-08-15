@@ -45,6 +45,7 @@ dependencies:
   supabase_flutter: ^2.16.0
   notification_listener_service: ^1.0.0
   flutter_local_notifications: ^18.0.1
+  android_intent_plus: ^6.1.0
 
 
 

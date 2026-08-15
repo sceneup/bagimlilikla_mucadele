@@ -1,44 +1,89 @@
+import 'package:bagimlilik/features/notification/repositories/daily_behavior_stats_repository.dart';
+import 'package:flutter/widgets.dart';
 import 'package:bagimlilik/features/notification/models/notification_state.dart';
 import 'package:bagimlilik/features/notification/providers/notification_service_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class NotificationViewModel extends Notifier<NotificationState> {
+class NotificationViewModel extends Notifier<NotificationState>
+    with WidgetsBindingObserver {
+
   @override
   NotificationState build() {
+    WidgetsBinding.instance.addObserver(this);
+
+    ref.onDispose(() {
+      WidgetsBinding.instance.removeObserver(this);
+    });
+
+    Future.microtask(checkPermission);
+
     return const NotificationState();
   }
 
-  Future<void> enableNotifications() async {
-    final service = ref.read(notificationServiceProvider);
+  // ============================================================
+  // ANDROID AYARLARINDAN GERİ DÖNÜLDÜĞÜNDE
+  // ============================================================
 
-    // ============================================================
-    // 1. LOCAL NOTIFICATION SERVİSİNİ BAŞLAT
-    // ============================================================
+  @override
+  void didChangeAppLifecycleState(
+      AppLifecycleState state,
+      ) {
+    if (state == AppLifecycleState.resumed) {
+      checkPermission();
+    }
+  }
+
+  // ============================================================
+  // BİLDİRİM ERİŞİMİNİ AÇ
+  // ============================================================
+
+  Future<void> enableNotifications() async {
+    final service = ref.read(
+      notificationServiceProvider,
+    );
 
     await service.initialize();
 
-    // ============================================================
-    // 2. BİLDİRİM OKUMA İZNİ
-    // ============================================================
+    await service.openNotificationSettings();
+  }
 
-    final granted = await service.requestPermission();
+  // ============================================================
+  // İZİN DURUMUNU KONTROL ET
+  // ============================================================
+
+  Future<void> checkPermission() async {
+    final service = ref.read(
+      notificationServiceProvider,
+    );
+
+    await service.initialize();
+
+    final granted =
+    await service.isPermissionGranted();
 
     state = state.copyWith(
       hasPermission: granted,
     );
 
-    // ============================================================
-    // 3. BİLDİRİMLERİ DİNLE
-    // ============================================================
-
     if (granted) {
-      service.startListening();
+      await service.startListening();
     }
   }
+  Future<void> confirmNotificationAccess() async {
+    final repository = DailyBehaviorStatsRepository();
 
-  void stopListening() {
-    ref
-        .read(notificationServiceProvider)
-        .stopListening();
+    await repository.setNotificationAccessConfirmed(true);
+  }
+
+  // ============================================================
+  // DİNLEMEYİ DURDUR
+  // ============================================================
+
+  Future<void> stopListening() async {
+    final service = ref.read(
+      notificationServiceProvider,
+    );
+
+    await service.stopListening();
   }
 }
