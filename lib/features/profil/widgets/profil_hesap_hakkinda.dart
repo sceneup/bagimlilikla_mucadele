@@ -33,7 +33,7 @@ class ProfilHesapHakkinda extends StatelessWidget {
                 icon: Icons.notifications_none_outlined,
                 baslik: 'Bildirimler',
                 onTap: () {
-                  // Bildirimler sayfası
+                  context.go("/erisim-bildirim");
                 },
               ),
 

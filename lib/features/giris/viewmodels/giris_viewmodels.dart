@@ -2,6 +2,7 @@ import 'package:bagimlilik/features/auth/providers/auth_provider.dart';
 import 'package:bagimlilik/features/auth/services/auth_service.dart';
 import 'package:bagimlilik/features/giris/viewmodels/giris_state.dart';
 import 'package:bagimlilik/features/notification/repositories/daily_behavior_stats_repository.dart';
+import 'package:bagimlilik/features/notification/providers/notification_service_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,14 +11,20 @@ import 'package:bagimlilik/features/anket/repositories/survey_repository.dart';
 
 class GirisViewModel extends Notifier<GirisState> {
   late final AuthService _authService;
+
   final SurveyRepository _surveyRepository =
   SurveyRepository();
+
   final DailyBehaviorStatsRepository _notificationRepository =
   DailyBehaviorStatsRepository();
+
   final formKey = GlobalKey<FormState>();
 
-  final usernameController = TextEditingController();
-  final passwordController = TextEditingController();
+  final usernameController =
+  TextEditingController();
+
+  final passwordController =
+  TextEditingController();
 
   void setLoading(bool value) {
     state = state.copyWith(
@@ -39,11 +46,18 @@ class GirisViewModel extends Notifier<GirisState> {
     );
 
     try {
-      final username = usernameController.text.trim();
-      final password = passwordController.text;
+      final username =
+      usernameController.text.trim();
 
-      // Kullanıcı adından email'i bul
-      final email = await Supabase.instance.client.rpc(
+      final password =
+          passwordController.text;
+
+      // ==================================================
+      // KULLANICI ADINDAN EMAIL BUL
+      // ==================================================
+
+      final email =
+      await Supabase.instance.client.rpc(
         'get_email_by_username',
         params: {
           'input_username': username,
@@ -58,8 +72,12 @@ class GirisViewModel extends Notifier<GirisState> {
         return null;
       }
 
-      // Email + şifre ile Supabase Auth
-      final response = await _authService.signIn(
+      // ==================================================
+      // SUPABASE AUTH
+      // ==================================================
+
+      final response =
+      await _authService.signIn(
         email: email,
         password: password,
       );
@@ -72,33 +90,41 @@ class GirisViewModel extends Notifier<GirisState> {
         return null;
       }
 
-      // --------------------------------------------------
+      // ==================================================
       // ANKET KONTROLÜ
-      // --------------------------------------------------
-
-      // --------------------------------------------------
-// ANKET KONTROLÜ
-// --------------------------------------------------
+      // ==================================================
 
       final anketGerekli =
       await _surveyRepository.isSurveyDue();
 
       if (anketGerekli) {
         EasyLoading.dismiss();
+
         return '/anket';
       }
 
-// --------------------------------------------------
-// BİLDİRİM ERİŞİMİ KONTROLÜ
-// --------------------------------------------------
+      // ==================================================
+      // BİLDİRİM KONTROLÜ
+      // ==================================================
 
+      final notificationService =
+      ref.read(notificationServiceProvider);
+
+      // Android'deki GERÇEK bildirim erişimi
+      final bildirimIzniVar =
+      await notificationService.isPermissionGranted();
+
+      // Kullanıcı daha önce ekranı tamamladı mı?
       final bildirimTamamlandi =
       await _notificationRepository
           .isNotificationAccessConfirmed();
 
       EasyLoading.dismiss();
 
-      if (!bildirimTamamlandi) {
+      // Gerçek Android izni yoksa VEYA
+      // kullanıcı daha önce tamamlamadıysa
+      // bildirim erişim ekranına gönder.
+      if (!bildirimIzniVar || !bildirimTamamlandi) {
         return '/erisim-bildirim';
       }
 
@@ -133,7 +159,8 @@ class GirisViewModel extends Notifier<GirisState> {
 
   @override
   GirisState build() {
-    _authService = ref.read(authServiceProvider);
+    _authService =
+        ref.read(authServiceProvider);
 
     ref.onDispose(() {
       usernameController.dispose();

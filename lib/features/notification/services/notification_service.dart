@@ -81,7 +81,7 @@ class NotificationService {
       action: 'android.settings.NOTIFICATION_LISTENER_DETAIL_SETTINGS',
       arguments: {
         'android.provider.extra.NOTIFICATION_LISTENER_COMPONENT_NAME':
-        '$packageName/notification.listener.service.NotificationListener',
+        '$packageName/com.example.bagimlilik.SiriusNotificationListener',
       },
     );
 

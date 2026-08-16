@@ -7,6 +7,7 @@ import 'package:bagimlilik/core/config/supabase_config.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bagimlilik/features/bekleme_listesi/services/bildirim_service.dart';
 import 'package:bagimlilik/features/notification/services/notification_service.dart';
+import 'package:bagimlilik/features/notification/services/native_notification_action_sync_service.dart';
 import 'package:flutter/foundation.dart';
 
 void configLoading() {
@@ -32,6 +33,8 @@ Future<void> main() async {
     url: SupabaseConfig.supabaseUrl,
     publishableKey: SupabaseConfig.supabaseAnonKey,
   );
+
+  await NativeNotificationActionSyncService().flushPendingActions();
 
   final notificationService = NotificationService(router: appRouter,);
 
